@@ -1,54 +1,27 @@
 # 09. Constructor Injection
 
-## Read First
+## Why Constructor Injection?
 
-Consider an Account.
-
-To create an Account, we need:
+An Account needs:
 
 - Name
 - Balance
-- Mobile Numbers
+- Mobiles
 - Address
 
-Question:
+Without these values, the Account object is incomplete.
 
-Can an Account be created without these?
-
-```text
-No
-```
-
-So all required data must be provided while creating the object.
-
-This is where Constructor Injection is used.
-
----
-
-## Apply Concept
-
-Without Constructor Injection:
+Instead of creating the object first and supplying data later:
 
 ```java
 AccountDetails acc =
         new AccountDetails();
 
 acc.setName("Dilip");
-
 acc.setBalance(500);
-
-acc.setMobiles(mobiles);
-
-acc.setCustomerAddress(address);
 ```
 
-Object is created first.
-
-Data is supplied later.
-
----
-
-With Constructor Injection:
+Spring can supply everything while creating the object:
 
 ```java
 new AccountDetails(
@@ -59,11 +32,11 @@ new AccountDetails(
 );
 ```
 
-Everything is supplied during object creation.
+This approach is called Constructor Injection.
 
 ---
 
-## Bean Class
+## AccountDetails Bean
 
 ```java
 public class AccountDetails {
@@ -90,9 +63,11 @@ public class AccountDetails {
 }
 ```
 
+Constructor parameters represent the data required to create the object.
+
 ---
 
-## Dependency Class
+## Address Dependency
 
 ```java
 public class Address {
@@ -106,11 +81,7 @@ public class Address {
 }
 ```
 
----
-
-## Structure Clearly
-
-Dependency Flow:
+AccountDetails depends on Address.
 
 ```text
 AccountDetails
@@ -119,15 +90,11 @@ AccountDetails
 Address
 ```
 
-AccountDetails needs Address.
-
-Spring will supply Address while creating AccountDetails.
-
 ---
 
 ## XML Configuration
 
-### Step 1 : Create Address Bean
+### Address Bean
 
 ```xml
 <bean id="addr"
@@ -145,9 +112,7 @@ Spring will supply Address while creating AccountDetails.
 </bean>
 ```
 
----
-
-### Step 2 : Create AccountDetails Bean
+### Constructor Injection
 
 ```xml
 <bean id="accountDeatils"
@@ -161,148 +126,91 @@ Spring will supply Address while creating AccountDetails.
             name="balance"
             value="500.00"/>
 
+    <constructor-arg
+            name="customerAddress"
+            ref="addr"/>
+
     <constructor-arg name="mobiles">
 
         <set>
 
             <value>8826111377</value>
-
             <value>8826111377</value>
-
             <value>+91-88888888</value>
-
             <value>+232388888888</value>
 
         </set>
 
     </constructor-arg>
 
-    <constructor-arg
-            name="customerAddress"
-            ref="addr"/>
-
 </bean>
 ```
 
 ---
 
-## Understanding constructor-arg
+## Understanding value and ref
 
 ### value
 
-Used for:
-
-```text
-Primitive Values
-
-String Values
-```
-
-Example:
+Used for actual values.
 
 ```xml
-<constructor-arg
-        name="name"
-        value="Dilip"/>
+value="Dilip"
+```
+
+Spring injects:
+
+```java
+"Dilip"
 ```
 
 ---
 
 ### ref
 
-Used for:
-
-```text
-Bean Objects
-```
-
-Example:
+Used for another bean.
 
 ```xml
-<constructor-arg
-        name="customerAddress"
-        ref="addr"/>
+ref="addr"
 ```
 
-Meaning:
+Spring injects:
 
-```text
-Use the Address bean
-while creating AccountDetails.
+```java
+Address addressBean
 ```
 
 ---
 
-## What Spring Does
+## What Spring Does Internally
 
-### Step 1
-
-Create Address Bean
+Spring creates Address:
 
 ```java
 Address addr =
         new Address();
 ```
 
----
-
-### Step 2
-
-Create Mobiles Collection
+Creates collection:
 
 ```java
 Set<String> mobiles =
         new HashSet<>();
 ```
 
----
-
-### Step 3
-
-Call Constructor
+Calls constructor:
 
 ```java
 AccountDetails details =
         new AccountDetails(
                 "Dilip",
-                500.00,
+                500,
                 mobiles,
                 addr
         );
 ```
 
----
-
-### Result
-
-```text
-AccountDetails Created
-
-Name Available
-
-Balance Available
-
-Mobiles Available
-
-Address Available
-```
-
-Everything is ready immediately.
-
----
-
-## Testing
-
-```java
-ApplicationContext context =
-        new FileSystemXmlApplicationContext(
-                "beans.xml");
-
-AccountDetails details =
-        (AccountDetails)
-        context.getBean(
-                "accountDeatils");
-```
+Object is fully ready immediately after creation.
 
 ---
 
@@ -322,106 +230,91 @@ Dilip
 Lotus Homes
 ```
 
+Duplicate mobile number appears once because:
+
+```text
+Set removes duplicates.
+```
+
 ---
 
-## Apply Concept
+## Constructor Injection vs Setter Injection
 
-Use Constructor Injection when data is required.
+Setter Injection:
+
+```text
+Create Object
+      ↓
+Inject Data
+```
+
+Constructor Injection:
+
+```text
+Inject Data
+      ↓
+Create Object
+```
+
+---
+
+## When To Use
+
+Use Constructor Injection when the object cannot work without the dependency.
 
 Examples:
 
 ```text
-Account
-→ Name Required
+Account → Address Required
 
-Employee
-→ Employee Id Required
+Order → Customer Required
 
-Order
-→ Customer Required
-
-Bank Account
-→ Address Required
+Employee → Employee Id Required
 ```
 
-If object cannot work without the dependency,
-
-use Constructor Injection.
-
----
-
-## Avoid Buzzwords
-
-Instead of saying:
+Required dependency:
 
 ```text
-Constructor Injection is a Dependency Injection technique
-for mandatory dependencies.
+Constructor Injection
 ```
 
-Say:
+Optional dependency:
 
 ```text
-Spring provides all required data
-while creating the object.
+Setter Injection
 ```
-
-Simple and correct.
 
 ---
 
 ## Quick Revision
 
-Constructor Injection:
-
-```text
-Create Object
-+
-Supply Data
-=
-Same Time
-```
-
-XML Tag:
-
 ```xml
 <constructor-arg>
 ```
 
-Primitive/String:
+Inject through constructor.
 
 ```xml
 value=""
 ```
 
-Object:
+Primitive/String value.
 
 ```xml
 ref=""
 ```
 
-Flow:
+Another bean.
 
 ```text
-Spring Creates Dependencies
-            │
-            ▼
-Spring Calls Constructor
-            │
-            ▼
-Object Created
+Setter Injection
+
+Create First
+Inject Later
 ```
 
----
-
-## Assessment Answer
-
 ```text
-Constructor Injection is a way of providing required data and dependent objects through a constructor while creating the bean.
+Constructor Injection
 
-Spring uses the <constructor-arg> tag for Constructor Injection.
-
-Primitive and String values are injected using value attribute and object dependencies are injected using ref attribute.
-
-Constructor Injection is mainly used when all dependencies are required during object creation.
+Inject While Creating
 ```
