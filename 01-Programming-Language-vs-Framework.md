@@ -1,175 +1,332 @@
-
 # Programming Language vs Framework
 
-## Why Should We Understand This?
+## Building an Application
 
-Before learning Spring Framework, it is important to understand the difference between a **Programming Language** and a **Framework**. This helps us understand where Spring fits in the software development process.
+Consider an E-Commerce application.
 
----
+Users can:
 
-## What is a Programming Language?
+- View Products
+- Add Items to Cart
+- Place Orders
+- Make Payments
 
-A programming language is a collection of keywords, syntax rules, and instructions that allow developers to communicate with a computer and build applications.
+To build this application, we need to solve many problems.
 
-In simple terms, a programming language is the foundation used to create software.
+```text
+Show Pages
 
-### Examples
+Handle User Requests
 
-- Java
-- Python
-- C#
-- .NET
+Process Business Logic
 
----
+Store Data
 
-## Do Projects Use Only One Programming Language?
+Secure Accounts
 
-Usually, **No**.
+Handle Errors
+```
 
-Most real-world applications contain multiple parts, and different technologies are used for different purposes.
-
-### Server Side (Backend)
-
-The server side is responsible for:
-
-- Business Logic
-- Calculations
-- API Processing
-- Database Operations
-
-**Languages Used:**
-
-- Java
-- Python
-- .NET
-
-#### Example
-
-In an E-Commerce Application:
-
-- Calculate total order amount
-- Apply discounts
-- Process payments
-- Save order details in the database
-
-These operations are handled on the server side.
+A programming language and a framework help solve these problems, but they play different roles.
 
 ---
 
-### Client Side (Frontend)
+# Programming Language
 
-The client side is responsible for what users see and interact with.
+A programming language gives developers the ability to write instructions for a computer.
 
-**Languages/Technologies Used:**
+Without a programming language:
 
-- HTML
-- JavaScript
-- React
-- Angular
+```text
+No Logic
 
-#### Example
+No Calculations
 
-When a customer clicks **Buy Now**, the button click and page interaction are handled by the client side.
-
----
-
-### Database Layer
-
-Applications often use SQL for database operations such as:
-
-- Insert Data
-- Update Data
-- Delete Data
-- Retrieve Data
-
-> A real-world project usually contains multiple languages and technologies working together.
-
----
-
-## What is a Framework?
-
-A framework is a collection of ready-made components, rules, and tools that help developers build applications faster.
-
-Instead of creating everything from scratch, developers can use the solutions already provided by the framework.
-
-### Definition
-
-> A framework simplifies development by providing reusable solutions for common application requirements.
-
----
-
-## Popular Frameworks
-
-### Java Frameworks
-
-- Spring
-- Spring Boot
-- Hibernate
-- Struts
-- Quarkus
-
-### PHP Frameworks
-
-- Laravel
-- Symfony
-- CodeIgniter
-- Slim
-- Lumen
-
-### JavaScript Frameworks
-
-- ReactJS
-- AngularJS
-- VueJS
-- NodeJS
-
-### Python Frameworks
-
-- Django
-- TurboGears
-- Dash
-
----
-
-## Why Do We Need a Framework?
-
-Many common problems occur repeatedly during application development.
+No Application
+```
 
 Examples:
 
-- URL Handling
-- Security
-- Database Connectivity
-- Exception Handling
-- Caching
+```text
+Java
 
-Instead of solving these problems every time, frameworks provide ready-made solutions.
+Python
 
-### Benefits
+C#
 
-- Faster Development
-- Reduced Repetitive Coding
-- Better Maintainability
-- Easier Project Setup
+JavaScript
+```
 
 ---
 
-## What Problems Does a Framework Solve?
+## What Does a Programming Language Actually Do?
 
-### Routing URLs
+Suppose a customer places an order.
 
-Frameworks help manage application URLs efficiently.
+The application must:
 
-**Examples:**
+```text
+Calculate Total Amount
+
+Apply Discount
+
+Calculate Tax
+
+Generate Final Price
+```
+
+Example:
+
+```java
+double total =
+        amount - discount;
+```
+
+The programming language provides the syntax and rules needed to write this logic.
+
+---
+
+## Real Project Structure
+
+A real project is not built using a single technology.
+
+Different parts of the application use different tools.
+
+```text
+Application
+      │
+      ├── Frontend
+      │
+      ├── Backend
+      │
+      └── Database
+```
+
+---
+
+## Frontend
+
+Frontend is what users see and interact with.
+
+Examples:
+
+```text
+Login Page
+
+Register Page
+
+Buy Now Button
+
+Product Listing
+```
+
+Technologies:
+
+```text
+HTML
+
+CSS
+
+JavaScript
+
+React
+
+Angular
+```
+
+Example:
+
+```text
+User clicks
+
+"Buy Now"
+```
+
+The click happens on the frontend.
+
+---
+
+## Backend
+
+Backend handles the actual work.
+
+Examples:
+
+```text
+Validate User
+
+Calculate Price
+
+Process Payment
+
+Save Order
+```
+
+Technologies:
+
+```text
+Java
+
+Python
+
+C#
+```
+
+Example:
+
+```text
+User clicks Buy Now
+        │
+        ▼
+Request Sent To Backend
+        │
+        ▼
+Order Processed
+```
+
+---
+
+## Database
+
+Applications must store information permanently.
+
+Examples:
+
+```text
+Customers
+
+Products
+
+Orders
+
+Payments
+```
+
+Database operations:
+
+```text
+Insert Data
+
+Update Data
+
+Delete Data
+
+Retrieve Data
+```
+
+Usually done using:
+
+```text
+SQL
+```
+
+---
+
+# The Problem
+
+Imagine building everything manually.
+
+For every application, developers would repeatedly create:
+
+```text
+Login Logic
+
+Security Logic
+
+Database Connection Logic
+
+Error Handling Logic
+
+URL Mapping Logic
+```
+
+The same problems appear in almost every project.
+
+---
+
+# Framework
+
+Instead of building these common features repeatedly, developers use a framework.
+
+A framework provides ready-made solutions for common application problems.
+
+```text
+Common Problem
+        │
+        ▼
+Framework Provides Solution
+```
+
+---
+
+## Example
+
+Without Framework:
+
+```text
+Create Login System
+
+Create Security
+
+Create Routing
+
+Create Database Layer
+
+Create Exception Handling
+```
+
+Everything must be built manually.
+
+---
+
+With Framework:
+
+```text
+Framework Already Provides
+Most Of These Features
+```
+
+Developers focus on business requirements.
+
+---
+
+## What Problem Does a Framework Solve?
+
+### URL Handling
+
+Applications receive requests such as:
 
 ```text
 /login
+
 /register
+
 /products
+
 /orders
 ```
 
-The framework routes requests to the appropriate application logic.
+The framework decides:
+
+```text
+Which Code Should Handle
+Which URL
+```
+
+Flow:
+
+```text
+Request
+      │
+      ▼
+URL Received
+      │
+      ▼
+Framework Finds Matching Logic
+      │
+      ▼
+Response Returned
+```
 
 ---
 
@@ -177,71 +334,253 @@ The framework routes requests to the appropriate application logic.
 
 Most applications require:
 
-- Login
-- Authentication
-- Authorization
+```text
+Login
 
-Frameworks provide built-in support for these requirements.
+Authentication
+
+Authorization
+```
+
+Without a framework:
+
+```text
+Developer Creates Everything
+```
+
+With a framework:
+
+```text
+Many Security Features
+Already Available
+```
 
 ---
 
-### Database Interaction
+### Database Communication
 
 Applications constantly communicate with databases.
 
 Examples:
 
-- Save Student
-- Retrieve Employee Details
-- Update Customer Information
+```text
+Save Student
 
-Frameworks simplify these operations.
+Save Employee
 
----
+Update Customer
 
-### Caching
+Find Product
+```
 
-Frequently used data can be stored temporarily to improve performance.
+Flow:
 
-#### Example
+```text
+Application
+      │
+      ▼
+Framework
+      │
+      ▼
+Database
+```
 
-Popular products displayed on an e-commerce homepage can be loaded faster using caching.
+Frameworks simplify this communication.
 
 ---
 
 ### Exception Handling
 
-Applications should handle errors properly.
+Applications should not crash when errors occur.
 
-Frameworks provide mechanisms to manage exceptions in a structured manner instead of allowing applications to fail unexpectedly.
+Example:
+
+```text
+Database Not Available
+```
+
+Instead of:
+
+```text
+Application Stops
+```
+
+Frameworks provide structured ways to handle failures.
 
 ---
 
-## Programming Language vs Framework
+### Caching
+
+Some data is requested repeatedly.
+
+Example:
+
+```text
+Popular Products
+```
+
+Instead of loading from the database every time:
+
+```text
+Database
+      │
+      ▼
+Cache
+      │
+      ▼
+User
+```
+
+Response becomes faster.
+
+---
+
+# Popular Frameworks
+
+## Java
+
+```text
+Spring
+
+Spring Boot
+
+Hibernate
+
+Struts
+
+Quarkus
+```
+
+---
+
+## Python
+
+```text
+Django
+
+TurboGears
+
+Dash
+```
+
+---
+
+## PHP
+
+```text
+Laravel
+
+Symfony
+
+CodeIgniter
+
+Slim
+
+Lumen
+```
+
+---
+
+## JavaScript
+
+```text
+React
+
+Angular
+
+Vue
+
+Node.js
+```
+
+---
+
+# Programming Language vs Framework
 
 | Programming Language | Framework |
-|---------------------|-----------|
-| Used to write software | Used to simplify software development |
+|----------|----------|
+| Used to write application logic | Used to simplify application development |
 | Provides syntax and rules | Provides ready-made solutions |
-| Foundation of development | Built using programming languages |
-| Example: Java, Python | Example: Spring, Django, React |
+| Developer builds features manually | Many common features already available |
+| Examples: Java, Python, C# | Examples: Spring, Django, React |
 
 ---
 
-## Key Points to Remember
+# Relationship Between Them
 
-- A programming language is used to create software.
-- Most projects use multiple technologies.
-- A framework provides ready-made solutions for common problems.
-- Frameworks increase development speed.
-- Frameworks reduce repetitive coding.
-- Spring and Spring Boot are Java frameworks.
-- Frameworks commonly handle routing, security, database interaction, caching, and exception handling.
+A framework does not replace a programming language.
+
+A framework is built using a programming language.
+
+Example:
+
+```text
+Java
+   │
+   ▼
+Spring Framework
+```
+
+Spring exists because Java exists.
+
+Without Java:
+
+```text
+No Spring Framework
+```
 
 ---
 
-## Conclusion
+# Complete Picture
 
-A programming language provides the basic tools required to build software, whereas a framework provides ready-made components and solutions that simplify application development.
+```text
+Programming Language
+        │
+        ▼
+Write Business Logic
+        │
+        ▼
+Framework
+        │
+        ▼
+Provides Common Solutions
+        │
+        ▼
+Faster Development
+```
 
-By using frameworks, developers can focus more on implementing business requirements and less on solving common infrastructure problems repeatedly.
+---
+
+# Key Observation
+
+Programming Language:
+
+```text
+Creates The Application
+```
+
+Framework:
+
+```text
+Helps Create The Application Faster
+```
+
+Think of it as:
+
+```text
+Programming Language
+=
+Raw Construction Materials
+```
+
+```text
+Framework
+=
+Ready-Made Construction Tools
+```
+
+Both are required.
+
+The language provides the foundation.
+
+The framework reduces repetitive work and lets developers focus on solving business problems.
