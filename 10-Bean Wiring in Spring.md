@@ -1,8 +1,8 @@
 # 10. Bean Wiring in Spring
 
-## Read First
+## Situation
 
-Suppose we have:
+We have multiple objects.
 
 ```text
 AccountDetails
@@ -14,7 +14,7 @@ Address
 AreaDetails
 ```
 
-Question:
+Questions:
 
 ```text
 How does AccountDetails get Address?
@@ -24,7 +24,7 @@ How does Address get AreaDetails?
 Who connects these objects?
 ```
 
-Without Spring:
+Without Spring, the developer must manually create and connect every object.
 
 ```java
 AreaDeatils area = new AreaDeatils();
@@ -38,54 +38,48 @@ AccountDetails account =
 account.setCustomerAddress(addr);
 ```
 
-Developer must manually create and connect every object.
+As dependencies increase:
+
+```text
+More Objects
+      ↓
+More Connections
+      ↓
+More Manual Work
+```
 
 ---
 
-## Bean Wiring
+## Solution : Bean Wiring
 
-Bean Wiring means:
+Spring can create the objects and connect them automatically.
 
 ```text
-Connecting one bean
-with another bean.
+Bean Wiring
+      ↓
+Connecting One Bean
+With Another Bean
 ```
 
-Spring creates the objects and connects them automatically.
+Instead of:
+
+```text
+Developer Connects Objects
+```
+
+Spring performs:
+
+```text
+Spring Creates Objects
+         +
+Spring Connects Objects
+```
 
 ---
 
-## Apply Concept
+# Understanding The Dependency Chain
 
-Real Scenario:
-
-```text
-AccountDetails
-needs
-Address
-
-Address
-needs
-AreaDetails
-```
-
-This dependency chain is:
-
-```text
-AccountDetails
-       │
-       ▼
-Address
-       │
-       ▼
-AreaDetails
-```
-
-Spring will create all objects and connect them.
-
----
-
-## Bean 1 : AreaDetails
+## AreaDetails
 
 Stores area information.
 
@@ -102,13 +96,14 @@ public class AreaDeatils {
 Example:
 
 ```text
-Street  : Naresh IT Road
-Pincode : 323232
+Street  → Naresh IT Road
+
+Pincode → 323232
 ```
 
 ---
 
-## Bean 2 : Address
+## Address
 
 Stores address information.
 
@@ -135,12 +130,16 @@ private AreaDeatils area;
 Meaning:
 
 ```text
-Address depends on AreaDetails.
+Address
+    ↓
+Needs
+    ↓
+AreaDetails
 ```
 
 ---
 
-## Bean 3 : AccountDetails
+## AccountDetails
 
 Stores account information.
 
@@ -167,14 +166,16 @@ private Address customerAddress;
 Meaning:
 
 ```text
-AccountDetails depends on Address.
+AccountDetails
+       ↓
+Needs
+       ↓
+Address
 ```
 
 ---
 
-## Structure Clearly
-
-Dependency Structure:
+# Complete Dependency Structure
 
 ```text
 AccountDetails
@@ -186,11 +187,11 @@ Address
 AreaDetails
 ```
 
+Spring must create all three objects and connect them correctly.
+
 ---
 
-## XML Configuration
-
-### Step 1 : Create AreaDetails Bean
+# Step 1 : Create AreaDetails Bean
 
 ```xml
 <bean id="areaDetails"
@@ -205,9 +206,28 @@ AreaDetails
 </bean>
 ```
 
+## What Spring Does
+
+```java
+AreaDeatils area =
+        new AreaDeatils();
+
+area.setStreet(
+        "Naresh It road");
+
+area.setPincode(
+        "323232");
+```
+
+Result:
+
+```text
+AreaDetails Bean Ready
+```
+
 ---
 
-### Step 2 : Create Address Bean
+# Step 2 : Create Address Bean
 
 ```xml
 <bean id="addr"
@@ -239,13 +259,41 @@ Important Line:
 Meaning:
 
 ```text
-Connect Address Bean
-with AreaDetails Bean.
+Inject The AreaDetails Bean
+Into Address Bean
 ```
+
+## What Spring Does
+
+```java
+Address addr =
+        new Address();
+
+addr.setFlatNo(333);
+
+addr.setHouseName(
+        "Lotus Homes");
+
+addr.setMobile(
+        91822222);
+
+addr.setArea(area);
+```
+
+Result:
+
+```text
+Address
+    │
+    ▼
+AreaDetails
+```
+
+Connection established.
 
 ---
 
-### Step 3 : Create AccountDetails Bean
+# Step 3 : Create AccountDetails Bean
 
 ```xml
 <bean id="accountDeatils"
@@ -277,43 +325,17 @@ Important Line:
 Meaning:
 
 ```text
-Connect AccountDetails Bean
-with Address Bean.
+Inject The Address Bean
+Into AccountDetails Bean
 ```
 
----
-
-## What Spring Does Internally
-
-Spring internally performs:
-
-### Step 1
-
-```java
-AreaDeatils area =
-        new AreaDeatils();
-```
-
-### Step 2
-
-```java
-Address addr =
-        new Address();
-```
-
-### Step 3
-
-```java
-addr.setArea(area);
-```
-
-### Step 4
+## What Spring Does
 
 ```java
 AccountDetails account =
         new AccountDetails(
-                name,
-                balance,
+                "Dilip",
+                500.00,
                 mobiles,
                 addr
         );
@@ -331,49 +353,91 @@ Address
 AreaDetails
 ```
 
-All objects become connected.
+Full dependency chain is ready.
 
 ---
 
-## value vs ref
+# value vs ref
 
-### value
+| Attribute | Used For |
+|------------|------------|
+| value | Primitive Values, String Values |
+| ref | Bean Objects, Dependencies |
 
-Used for:
+---
 
-```text
-Primitive Values
-
-String Values
-```
-
-Example:
+## value Example
 
 ```xml
-value="Dilip"
+<property
+        name="street"
+        value="Naresh It road"/>
+```
+
+Spring injects:
+
+```java
+"Naresh It road"
 ```
 
 ---
 
-### ref
-
-Used for:
-
-```text
-Bean Objects
-
-Dependencies
-```
-
-Example:
+## ref Example
 
 ```xml
-ref="addr"
+<property
+        name="area"
+        ref="areaDetails"/>
+```
+
+Spring injects:
+
+```java
+AreaDeatils area =
+        context.getBean(
+                "areaDetails");
 ```
 
 ---
 
-## Testing
+# Complete Internal Flow
+
+```text
+Spring Starts
+      │
+      ▼
+Reads beans.xml
+      │
+      ▼
+Creates AreaDetails Bean
+      │
+      ▼
+Creates Address Bean
+      │
+      ▼
+Injects AreaDetails
+Into Address
+      │
+      ▼
+Creates AccountDetails Bean
+      │
+      ▼
+Injects Address
+Into AccountDetails
+      │
+      ▼
+Stores Beans In Container
+      │
+      ▼
+Application Calls getBean()
+      │
+      ▼
+Configured Object Returned
+```
+
+---
+
+# Testing
 
 ```java
 AccountDetails details =
@@ -382,9 +446,11 @@ context.getBean(
         "accountDeatils");
 ```
 
+Spring returns the fully connected object.
+
 ---
 
-## Output
+# Output
 
 ```text
 Dilip
@@ -400,66 +466,36 @@ Dilip
 323232
 ```
 
-Explanation:
+## Understanding The Output
 
 ```text
-Dilip      → Account Name
+Dilip
+   ↓
+Account Name
 
-500.0      → Balance
+500.0
+   ↓
+Account Balance
 
-333        → Flat Number
+333
+   ↓
+Flat Number
 
-323232     → Area Pincode
+323232
+   ↓
+Area Pincode
 ```
 
----
+Notice:
 
-## Avoid Buzzwords
-
-Instead of saying:
-
-```text
-Bean Wiring is the process
-of configuring relationships
-between beans.
+```java
+details
+    .getCustomerAddress()
+    .getArea()
+    .getPincode();
 ```
 
-Say:
-
-```text
-Bean Wiring tells Spring
-which object should be
-connected to which object.
-```
-
-Much easier to understand.
-
----
-
-## Quick Revision
-
-```text
-Bean Wiring
-
-=
-Connecting Beans
-```
-
-```text
-value
-
-=
-Primitive/String
-```
-
-```text
-ref
-
-=
-Bean Object
-```
-
-Dependency Flow:
+works because Spring already connected:
 
 ```text
 AccountDetails
@@ -473,8 +509,42 @@ AreaDetails
 
 ---
 
-## Assessment Answer
+# Final Understanding
+
+Bean Wiring is simply telling Spring:
 
 ```text
-Bean Wiring is the process of connecting one Spring Bean with another Spring Bean. Spring uses the ref attribute to establish relationships between dependent objects and manages them automatically through the IoC Container.
+This Object Needs That Object
 ```
+
+Spring then:
+
+```text
+Creates Objects
+      ↓
+Connects Objects
+      ↓
+Stores Objects
+      ↓
+Returns Ready-To-Use Objects
+```
+
+In this example:
+
+```text
+AccountDetails
+       │
+       ▼
+Address
+       │
+       ▼
+AreaDetails
+```
+
+The connections are created using:
+
+```xml
+ref=""
+```
+
+and Spring automatically wires all dependent objects together.
