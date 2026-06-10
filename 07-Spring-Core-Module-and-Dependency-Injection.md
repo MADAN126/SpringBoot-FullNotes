@@ -1,4 +1,4 @@
-# 07. Spring Core Container (Sharp Version)
+# 07. Spring Core Container 
 
 ## Spring Core Container
 
