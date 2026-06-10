@@ -1,132 +1,522 @@
-# 07. Spring Core Container 
+# Spring Core Container
 
-## Spring Core Container
+## Situation
 
-Spring Core Container consists of three major modules:
+Spring is responsible for:
+
+```text
+Creating Objects
+
+Managing Objects
+
+Connecting Objects
+
+Providing Objects
+```
+
+To perform all these tasks, Spring needs an internal system.
+
+That system is called:
+
+```text
+Spring Core Container
+```
+
+---
+
+## Problem
+
+Suppose an application contains:
+
+```text
+Student
+
+Employee
+
+Address
+
+Course
+
+Account
+```
+
+Questions arise:
+
+```text
+Who Creates These Objects?
+
+Who Stores Them?
+
+Who Connects Dependencies?
+
+Who Returns Them When Needed?
+```
+
+Spring needs dedicated modules to handle these responsibilities.
+
+---
+
+## Solution
+
+Spring Core Container is divided into three modules.
 
 ```text
 Spring Core
-      +
+      │
+      ▼
 Spring Beans
-      +
+      │
+      ▼
 Spring Context
 ```
 
-Together they form the foundation of the Spring Framework.
+Together they perform object management.
 
 ---
 
-## 1. Spring Core Module
-
-### Purpose
-
-Spring Core provides the fundamental concepts of Spring.
-
-Main Concepts:
-
-- Inversion of Control (IoC)
-- Dependency Injection (DI)
-
-### Responsibility
-
-Spring Core defines the rules and mechanism through which Spring manages objects and dependencies.
-
-### Think Of It As
+# Big Picture
 
 ```text
-Spring Core = Brain
-```
-
-It defines:
-
-- How objects should be managed
-- How dependencies should be injected
-- How IoC should work
-
-### Key Point
-
-```text
-Spring Core provides IoC and DI concepts.
+Spring Core
+      │
+      ▼
+Defines How Spring Should Work
+      │
+      ▼
+Spring Beans
+      │
+      ▼
+Creates And Manages Objects
+      │
+      ▼
+Spring Context
+      │
+      ▼
+Provides Access To Objects
 ```
 
 ---
 
-## 2. Spring Beans Module
+# 1. Spring Core Module
 
-### Purpose
+## Situation
 
-Spring Beans module is responsible for Bean creation and Bean lifecycle management.
+Spring must manage objects automatically.
 
-It contains:
+Before doing that, Spring needs rules.
 
-- BeanFactory
-- BeanDefinition
-- Bean Lifecycle Management
+---
 
-### Example
+## Problem
+
+Without rules:
+
+```text
+No Dependency Injection
+
+No IoC
+
+No Object Management Strategy
+```
+
+Spring would not know:
+
+```text
+How To Create Objects
+
+How To Connect Objects
+
+How To Manage Dependencies
+```
+
+---
+
+## Solution
+
+Spring Core provides the fundamental concepts.
+
+Main concepts:
+
+```text
+IoC
+
+Dependency Injection
+```
+
+These concepts define how Spring should manage application objects.
+
+---
+
+## What Spring Core Actually Provides
+
+Spring Core defines:
+
+```text
+Object Management Rules
+
+Dependency Management Rules
+
+Injection Mechanisms
+
+Container Behaviour
+```
+
+It acts as the foundation of Spring.
+
+---
+
+## Internal View
+
+```text
+Spring Core
+      │
+      ▼
+Defines IoC
+      │
+      ▼
+Defines DI
+      │
+      ▼
+Provides Rules
+      │
+      ▼
+Other Modules Follow Them
+```
+
+---
+
+## Result
+
+Without Spring Core:
+
+```text
+No IoC
+
+No DI
+
+No Foundation
+```
+
+Spring Core provides the concepts on which everything else is built.
+
+---
+
+# 2. Spring Beans Module
+
+## Situation
+
+Spring Core provides concepts.
+
+But concepts alone cannot create objects.
+
+---
+
+## Problem
+
+Suppose Spring reads:
 
 ```xml
 <bean id="s1"
-      class="com.naresh.first.core.Student"/>
+      class="Student"/>
 ```
 
-Spring reads this configuration and creates the corresponding object.
-
-### Responsibility
-
-- Bean Creation
-- Bean Configuration
-- Bean Lifecycle Management
-
-### Think Of It As
+Questions:
 
 ```text
-Spring Core  = Rules
+Who Creates Student Object?
 
-Spring Beans = Bean Manager
-```
+Who Stores It?
 
-### Key Point
-
-```text
-Spring Beans module creates and manages Beans.
+Who Manages Its Lifecycle?
 ```
 
 ---
 
-## 3. Spring Context Module
+## Solution
 
-### Purpose
+Spring Beans module handles Bean management.
 
-Spring Context provides an advanced container called ApplicationContext.
+---
 
-It is built on top of Spring Core and Spring Beans modules.
+## What It Does
 
-### Responsibility
+Spring Beans is responsible for:
 
-- Accessing Beans
-- Managing Bean Relationships
-- Event Handling
-- Resource Loading
-- Application Configuration
+```text
+Bean Creation
 
-### Example
+Bean Configuration
+
+Bean Storage
+
+Bean Lifecycle Management
+```
+
+---
+
+## Example
+
+```xml
+<bean id="s1"
+      class="Student"/>
+```
+
+Spring reads:
+
+```text
+Bean Id = s1
+
+Class = Student
+```
+
+Then creates:
+
+```java
+Student s1 =
+        new Student();
+```
+
+---
+
+## Internal Flow
+
+```text
+Bean Definition Found
+         │
+         ▼
+Class Identified
+         │
+         ▼
+Object Created
+         │
+         ▼
+Dependencies Injected
+         │
+         ▼
+Bean Stored
+```
+
+---
+
+## Result
+
+Spring Beans becomes responsible for managing application objects.
+
+---
+
+# Bean Lifecycle View
+
+```text
+Bean Definition
+        │
+        ▼
+Bean Creation
+        │
+        ▼
+Dependency Injection
+        │
+        ▼
+Ready To Use
+        │
+        ▼
+Bean Destruction
+```
+
+---
+
+# 3. Spring Context Module
+
+## Situation
+
+Beans are created successfully.
+
+Now application code needs them.
+
+Example:
+
+```java
+Student s =
+        context.getBean("s1");
+```
+
+---
+
+## Problem
+
+If beans exist internally:
+
+```text
+How Do Developers Access Them?
+
+How Are Bean Relationships Managed?
+
+How Are Resources Loaded?
+```
+
+---
+
+## Solution
+
+Spring Context provides an advanced container.
+
+That container is:
+
+```text
+ApplicationContext
+```
+
+---
+
+## Example
 
 ```java
 ApplicationContext context =
-new ClassPathXmlApplicationContext("beans.xml");
+new ClassPathXmlApplicationContext(
+        "beans.xml");
 ```
 
-### Think Of It As
+Spring loads:
 
 ```text
-Spring Context = Interface To Spring Container
+Configuration
+
+Bean Definitions
+
+Dependencies
 ```
 
-### Key Point
+and prepares the container.
+
+---
+
+## Internal Flow
 
 ```text
-Spring Context provides access to configured Beans.
+Application Starts
+         │
+         ▼
+ApplicationContext Created
+         │
+         ▼
+Configuration Loaded
+         │
+         ▼
+Beans Created
+         │
+         ▼
+Beans Stored
+         │
+         ▼
+getBean()
+         │
+         ▼
+Bean Returned
+```
+
+---
+
+## What Context Module Provides
+
+```text
+Bean Access
+
+Resource Loading
+
+Event Handling
+
+Configuration Management
+
+Bean Relationship Management
+```
+
+---
+
+## Result
+
+Application code can easily access Spring-managed objects.
+
+---
+
+# How All Three Modules Work Together
+
+Consider:
+
+```xml
+<bean id="student"
+      class="Student"/>
+```
+
+---
+
+## Step 1 : Spring Core
+
+Provides rules:
+
+```text
+Use IoC
+
+Use Dependency Injection
+```
+
+---
+
+## Step 2 : Spring Beans
+
+Reads bean definition.
+
+Creates object.
+
+```java
+Student student =
+        new Student();
+```
+
+Stores bean.
+
+---
+
+## Step 3 : Spring Context
+
+Provides access.
+
+```java
+Student s =
+context.getBean(
+        "student");
+```
+
+Returns bean.
+
+---
+
+# Complete Internal Flow
+
+```text
+Application Starts
+         │
+         ▼
+Spring Core Rules Loaded
+         │
+         ▼
+Bean Definitions Read
+         │
+         ▼
+Spring Beans Creates Objects
+         │
+         ▼
+Dependencies Injected
+         │
+         ▼
+Beans Stored
+         │
+         ▼
+ApplicationContext Ready
+         │
+         ▼
+getBean()
+         │
+         ▼
+Bean Returned
 ```
 
 ---
@@ -135,56 +525,56 @@ Spring Context provides access to configured Beans.
 
 ```text
 Spring Core
-      ↓
-Provides IoC & DI Concepts
+      │
+      ▼
+Provides Concepts
+(IoC & DI)
+
+      │
+      ▼
 
 Spring Beans
-      ↓
-Creates & Manages Beans
+      │
+      ▼
+Creates And Manages Beans
+
+      │
+      ▼
 
 Spring Context
-      ↓
+      │
+      ▼
 Provides Access To Beans
 ```
 
 ---
 
-# Quick Revision
+# Key Observation
 
-| Module | Responsibility |
-|----------|----------------|
-| Spring Core | Provides IoC and DI concepts |
-| Spring Beans | Creates and manages Beans |
-| Spring Context | Provides access to Beans through ApplicationContext |
-
----
-
-# Interview Answer
-
-### What is Spring Core Container?
-
-Spring Core Container is the foundation of the Spring Framework and consists of three modules:
-
-1. Spring Core → Provides IoC and Dependency Injection concepts.
-2. Spring Beans → Responsible for Bean creation, configuration, and lifecycle management.
-3. Spring Context → Provides ApplicationContext to access and manage Beans.
-
----
-
-# Memory Trick
+Each module has a different responsibility.
 
 ```text
-Core    → Concepts
-
-Beans   → Creation
-
-Context → Access
+Spring Core
+=
+Rules
 ```
-
-### One-Line Summary
 
 ```text
-Spring Core defines IoC and DI concepts,
-Spring Beans creates and manages objects,
-Spring Context provides access to those objects.
+Spring Beans
+=
+Creation & Management
 ```
+
+```text
+Spring Context
+=
+Access & Usage
+```
+
+Together:
+
+```text
+Spring Core Container
+```
+
+manages the complete lifecycle of Spring objects from creation to usage.
