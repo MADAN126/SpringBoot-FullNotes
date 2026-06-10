@@ -1,4 +1,4 @@
-# 03. Advantages of Spring Framework
+# Advantages of Spring Framework
 
 ## Why Do We Need Spring?
 
