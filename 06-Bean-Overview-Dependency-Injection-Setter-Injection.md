@@ -1,91 +1,307 @@
-# 06. Bean Overview, Dependency Injection & Setter Injection
+# Bean Overview, Dependency Injection & Setter Injection
 
-## Bean Overview
+## Situation
 
-A Spring IoC Container manages one or more Beans.
+Consider a Student object.
 
-These Beans are created using configuration metadata provided to the container, such as XML configuration.
-
-Example:
-
-```xml
-<bean id="s1" class="com.naresh.first.core.Student"/>
+```java
+Student student =
+        new Student();
 ```
 
-Here Spring creates and manages the Student object.
+The object exists.
+
+But it still needs data.
+
+```text
+Student Name
+
+Student Id
+
+College Name
+```
+
+The question is:
+
+```text
+Who Creates The Object?
+
+Who Supplies The Data?
+
+Who Stores The Object?
+
+Who Returns The Object Later?
+```
 
 ---
 
-## Bean Identifier
+# Bean Overview
 
-Every Bean must have a unique identifier inside the Spring Container.
+## Problem
+
+In large applications there may be hundreds of objects.
+
+Examples:
+
+```text
+Student
+
+Employee
+
+Course
+
+Address
+
+Account
+```
+
+Creating and managing every object manually becomes difficult.
+
+---
+
+## Solution
+
+Spring manages application objects.
+
+Spring calls these managed objects:
+
+```text
+Beans
+```
+
+A Bean is simply:
+
+```text
+An Object Managed By Spring
+```
+
+---
+
+## Creating a Bean
+
+```xml
+<bean id="s1"
+      class="com.naresh.first.core.Student"/>
+```
+
+This tells Spring:
+
+```text
+Create Student Object
+
+Manage Student Object
+
+Store Student Object
+```
+
+---
+
+## Internal Flow
+
+```text
+Bean Definition Found
+         │
+         ▼
+Class Identified
+         │
+         ▼
+Object Created
+         │
+         ▼
+Bean Stored
+         │
+         ▼
+Ready To Use
+```
+
+---
+
+## What Spring Does Internally
+
+Spring reads:
+
+```xml
+<bean id="s1"
+      class="Student"/>
+```
+
+and performs:
+
+```java
+Student s1 =
+        new Student();
+```
+
+Then stores it inside the container.
+
+---
+
+# Bean Identifier (id)
+
+## Problem
+
+Suppose Spring creates:
+
+```text
+Student
+
+Employee
+
+Address
+
+Course
+```
+
+How will the application ask for a specific object?
+
+---
+
+## Solution
+
+Every Bean gets a unique identifier.
 
 Example:
 
 ```xml
-<bean id="s1" class="com.naresh.first.core.Student"/>
+<bean id="s1"
+      class="Student"/>
 ```
 
 Here:
 
 ```text
-Bean ID = s1
-```
-
-The Bean ID is used to retrieve the object from the IoC Container.
-
-```java
-Student s1 = (Student) factory.getBean("s1");
+Bean Id = s1
 ```
 
 ---
 
-## Bean Naming Convention
+## Retrieving Bean
 
-Spring follows Java variable naming conventions.
+```java
+Student student =
+(Student)
+factory.getBean("s1");
+```
+
+Spring searches:
+
+```text
+s1
+```
+
+and returns the matching object.
+
+---
+
+## Internal Flow
+
+```text
+getBean("s1")
+        │
+        ▼
+Container Searches
+        │
+        ▼
+Bean Found
+        │
+        ▼
+Object Returned
+```
+
+---
+
+# Bean Naming Convention
+
+Spring bean names usually follow Java variable naming rules.
 
 Examples:
 
 ```text
-accountManager
-accountService
-userDao
-loginController
 studentService
+
+accountManager
+
+userDao
+
+loginController
 ```
 
-### Rule
+Rule:
 
-- Start with lowercase letter
-- Use camelCase naming
+```text
+Start With Lowercase
+
+Use camelCase
+```
 
 ---
 
-## Bean Instantiation
+# Bean Definition = Object Recipe
 
-A Bean Definition acts like a recipe for object creation.
+## Situation
+
+Before creating an object, Spring needs instructions.
+
+---
+
+## Solution
+
+Bean definition acts as a recipe.
 
 Example:
 
 ```xml
-<bean id="s1" class="com.naresh.first.core.Student"/>
+<bean id="s1"
+      class="Student"/>
 ```
 
-Spring reads the configuration and internally creates:
+This definition tells Spring:
 
-```java
-new Student();
+```text
+Which Class To Create
+
+What Id To Assign
 ```
 
-The object is then stored inside the IoC Container.
+---
+
+## Internal Flow
+
+```text
+Bean Definition
+        │
+        ▼
+Spring Reads Configuration
+        │
+        ▼
+Object Created
+        │
+        ▼
+Object Stored
+```
 
 ---
 
 # Dependency Injection (DI)
 
-Dependency Injection is a design pattern used to provide dependencies from outside a class instead of creating them inside the class.
+## Situation
 
-### Without DI
+Student needs Address.
+
+```java
+Student
+    │
+    ▼
+Address
+```
+
+Student depends on Address.
+
+---
+
+## Problem
+
+Without Dependency Injection:
 
 ```java
 public class Student {
@@ -93,81 +309,182 @@ public class Student {
     private Address address;
 
     public Student() {
-        address = new Address();
+
+        address =
+            new Address();
     }
 }
 ```
 
-### Problem
+Student creates Address itself.
+
+Now:
 
 ```text
-Tight Coupling
+Student Knows Address
+
+Student Creates Address
+
+Student Controls Address
 ```
 
-Student directly depends on Address.
+Both classes become tightly connected.
 
 ---
 
-### With DI
+## Why Is This A Problem?
+
+Suppose Address changes.
+
+```text
+Address Modified
+        │
+        ▼
+Student May Need Changes
+```
+
+Testing also becomes harder.
+
+Because Student always creates Address.
+
+---
+
+## Solution
+
+Let somebody else provide Address.
 
 ```java
 public class Student {
 
     private Address address;
 
-    public void setAddress(Address address) {
-        this.address = address;
+    public void setAddress(
+            Address address) {
+
+        this.address =
+                address;
     }
 }
 ```
 
-Now dependency is provided from outside.
+Student no longer creates Address.
 
-### Result
+Student only receives Address.
+
+---
+
+## Internal Flow
+
+```text
+Address Created
+       │
+       ▼
+Student Created
+       │
+       ▼
+Address Supplied
+       │
+       ▼
+Student Ready
+```
+
+---
+
+## Result
 
 ```text
 Loose Coupling
 ```
 
----
+Student uses Address.
 
-## Types of Dependency Injection
-
-### 1. Setter Injection
-
-Dependencies are injected using setter methods.
-
-### 2. Constructor Injection
-
-Dependencies are injected using constructors.
-
-### 3. Field Injection
-
-Dependencies are injected directly into fields.
+Student does not create Address.
 
 ---
 
-## Advantages of Dependency Injection
+# Why Dependency Injection Exists
 
-### Loose Coupling
+Dependency Injection separates:
 
-Classes become independent from specific implementations.
+```text
+Object Usage
+```
 
-### Better Testability
+from
 
-Mock objects can be injected during testing.
+```text
+Object Creation
+```
 
-### Increased Flexibility
+---
 
-Implementations can be changed without modifying business logic.
+Without DI:
+
+```text
+Class Creates Dependency
+```
+
+With DI:
+
+```text
+Class Receives Dependency
+```
+
+---
+
+## Result
+
+```text
+Easy Maintenance
+
+Easy Testing
+
+Easy Replacement
+
+Flexible Design
+```
+
+---
+
+# Types of Dependency Injection
+
+Spring can inject dependencies in three ways.
+
+| Type | Injection Point |
+|--------|--------|
+| Setter Injection | Setter Method |
+| Constructor Injection | Constructor |
+| Field Injection | Direct Field |
 
 ---
 
 # Setter Injection
 
-Setter Injection is performed using the `<property>` tag.
+## Situation
 
-Spring creates the object first and then calls setter methods to inject values.
+Student object is created.
+
+Now Spring must supply values.
+
+```text
+Student Name
+
+Student Id
+
+College Name
+```
+
+---
+
+## Solution
+
+Spring uses setter methods.
+
+This approach is called:
+
+```text
+Setter Injection
+```
 
 ---
 
@@ -180,7 +497,6 @@ public class Student {
     private String studentId;
     private String clgName;
 
-    // Getters and Setters
 }
 ```
 
@@ -189,116 +505,231 @@ public class Student {
 ## Bean Configuration
 
 ```xml
-<bean id="s1" class="com.naresh.first.core.Student">
+<bean id="s1"
+      class="Student">
 
-    <property name="clgName"
-              value="ABC College"/>
+    <property
+            name="clgName"
+            value="ABC College"/>
 
-    <property name="studentName"
-              value="Dilip Singh"/>
+    <property
+            name="studentName"
+            value="Dilip Singh"/>
 
-    <property name="studentId"
-              value="100"/>
+    <property
+            name="studentId"
+            value="100"/>
 
 </bean>
 ```
 
 ---
 
-## Understanding Property Tag
+# Understanding property Tag
 
-### name
+## Problem
 
-Represents Bean variable name.
+Spring must know:
+
+```text
+Which Variable?
+
+Which Value?
+```
+
+---
+
+## name Attribute
+
+Identifies the target variable.
+
+Example:
 
 ```xml
 name="studentName"
 ```
 
-### value
+Spring searches for:
 
-Represents actual value to be injected.
+```java
+private String studentName;
+```
+
+and
+
+```java
+setStudentName()
+```
+
+---
+
+## value Attribute
+
+Represents the actual value.
+
+Example:
 
 ```xml
 value="Dilip Singh"
 ```
 
----
-
-## What Spring Does Internally
-
-Spring internally performs:
-
-```java
-Student s1 = new Student();
-
-s1.setClgName("ABC College");
-s1.setStudentName("Dilip Singh");
-s1.setStudentId("100");
-```
-
-This code is automatically generated by Spring.
+Spring injects this value into the property.
 
 ---
 
-## Getting Bean Object
+# What Spring Does Internally
+
+Spring creates object first.
 
 ```java
 Student s1 =
-(Student) factory.getBean("s1");
+        new Student();
 ```
 
-Spring returns the configured object from the IoC Container.
+Then injects values.
+
+```java
+s1.setClgName(
+        "ABC College");
+
+s1.setStudentName(
+        "Dilip Singh");
+
+s1.setStudentId(
+        "100");
+```
 
 ---
 
-## Output
+## Important Observation
+
+Setter Injection happens:
 
 ```text
-100
-Dilip Singh
-ABC College
-This is Student class
-76.0
+After Object Creation
 ```
+
+First:
+
+```java
+new Student()
+```
+
+Then:
+
+```java
+setStudentName()
+```
+
+---
+
+# Getting the Bean
+
+Application requests object.
+
+```java
+Student s1 =
+(Student)
+factory.getBean("s1");
+```
+
+Spring returns the configured bean.
 
 ---
 
 ## Internal Flow
 
 ```text
-beans.xml
-     ↓
-Spring Reads Bean Configuration
-     ↓
-Creates Student Object
-     ↓
-Calls Setter Methods
-     ↓
-Stores Object in IoC Container
-     ↓
 getBean("s1")
-     ↓
-Returns Student Object
+       │
+       ▼
+Container Searches
+       │
+       ▼
+Bean Found
+       │
+       ▼
+Configured Object Returned
 ```
 
 ---
 
-## Key Points
+# Complete Internal Flow
 
-- Every Bean must have a unique ID.
-- Bean names should follow camelCase convention.
-- Bean definitions act as recipes for object creation.
-- Dependency Injection helps achieve Loose Coupling.
-- Spring supports Setter, Constructor and Field Injection.
-- Setter Injection uses the `<property>` tag.
-- Spring automatically injects values through setter methods.
-- Objects are retrieved using `getBean()`.
+```text
+beans.xml
+      │
+      ▼
+Spring Reads Configuration
+      │
+      ▼
+Student Object Created
+      │
+      ▼
+Setter Methods Invoked
+      │
+      ▼
+Values Injected
+      │
+      ▼
+Bean Stored In Container
+      │
+      ▼
+getBean("s1")
+      │
+      ▼
+Configured Bean Returned
+```
 
 ---
 
-## Conclusion
+# Output
 
-Dependency Injection is one of the core features of Spring Framework.
+```text
+100
 
-Using Setter Injection, Spring automatically injects values into Bean properties through setter methods, making applications loosely coupled, flexible, maintainable and easy to test.
+Dilip Singh
+
+ABC College
+
+This is Student class
+
+76.0
+```
+
+---
+
+# Key Observation
+
+A Bean is:
+
+```text
+An Object Managed By Spring
+```
+
+Dependency Injection means:
+
+```text
+Object Receives Dependency
+
+Instead Of
+
+Creating Dependency
+```
+
+Setter Injection means:
+
+```text
+Create Object First
+         │
+         ▼
+Inject Values Later
+```
+
+Spring achieves this using:
+
+```xml
+<property>
+```
+
+and internally invokes the corresponding setter methods.
