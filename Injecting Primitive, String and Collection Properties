@@ -1,0 +1,450 @@
+# 08. Injecting Primitive, String and Collection Properties
+
+**File Name:** `08-Injecting-Primitive-String-And-Collection-Properties.md`
+
+## Introduction
+
+Spring Setter Injection can be used not only for dependent objects but also for:
+
+- Primitive Data Types
+- String Data Types
+- Collection Data Types
+
+Spring injects these values through the `<property>` tag inside the Bean configuration.
+
+---
+
+# Injecting Primitive and String Properties
+
+## Bean Class
+
+```java
+public class Student {
+
+    private String stuName;
+    private int studId;
+    private double avgOfMarks;
+    private short passedOutYear;
+    private boolean isSelected;
+
+    // Getters and Setters
+}
+```
+
+---
+
+## Bean Configuration
+
+```xml
+<bean id="studentOne"
+      class="com.naresh.hello.Student">
+
+    <property name="stuName"
+              value="Dilip"/>
+
+    <property name="studId"
+              value="101"/>
+
+    <property name="avgOfMarks"
+              value="99.88"/>
+
+    <property name="passedOutYear"
+              value="2022"/>
+
+    <property name="isSelected"
+              value="true"/>
+
+</bean>
+```
+
+---
+
+## Understanding Property Injection
+
+### name Attribute
+
+Represents Bean class variable name.
+
+Example:
+
+```xml
+<property name="stuName"
+          value="Dilip"/>
+```
+
+```text
+Bean Variable = stuName
+```
+
+---
+
+### value Attribute
+
+Represents actual value to be injected.
+
+Example:
+
+```xml
+value="Dilip"
+```
+
+```text
+Injected Value = Dilip
+```
+
+---
+
+## Internal Execution
+
+Spring internally performs:
+
+```java
+Student studentOne = new Student();
+
+studentOne.setStuName("Dilip");
+studentOne.setStudId(101);
+studentOne.setAvgOfMarks(99.88);
+studentOne.setPassedOutYear((short)2022);
+studentOne.setSelected(true);
+```
+
+---
+
+## Testing Bean Values
+
+```java
+ApplicationContext context =
+new FileSystemXmlApplicationContext(
+"beans.xml");
+
+Student s1 =
+(Student) context.getBean("studentOne");
+
+System.out.println(s1.getStudId());
+System.out.println(s1.getStuName());
+System.out.println(s1.getPassedOutYear());
+System.out.println(s1.getAvgOfMarks());
+System.out.println(s1.isSelected());
+```
+
+---
+
+## Output
+
+```text
+101
+Dilip
+2022
+99.88
+true
+```
+
+---
+
+# Injecting Collection Data Types
+
+Spring also supports injection of Collection properties.
+
+Supported Collections:
+
+- List
+- Set
+- Map
+
+---
+
+## Collection Tags
+
+| Collection | Spring Tag |
+|------------|------------|
+| List | `<list>` |
+| Set | `<set>` |
+| Map | `<map>` |
+
+---
+
+# Injecting List Property
+
+## Bean Property
+
+```java
+private List<String> emails;
+```
+
+---
+
+## XML Configuration
+
+```xml
+<property name="emails">
+
+    <list>
+        <value>dilip@gmail.com</value>
+        <value>laxmi@gmail.com</value>
+        <value>dilip@gmail.com</value>
+    </list>
+
+</property>
+```
+
+---
+
+## Result
+
+```text
+[dilip@gmail.com,
+ laxmi@gmail.com,
+ dilip@gmail.com]
+```
+
+### Observation
+
+```text
+List allows duplicate values.
+```
+
+---
+
+# Injecting Set Property
+
+## Bean Property
+
+```java
+private Set<String> mobileNumbers;
+```
+
+---
+
+## XML Configuration
+
+```xml
+<property name="mobileNumbers">
+
+    <set>
+        <value>8826111377</value>
+        <value>8826111377</value>
+        <value>+1234567890</value>
+    </set>
+
+</property>
+```
+
+---
+
+## Result
+
+```text
+[8826111377,
+ +1234567890]
+```
+
+### Observation
+
+```text
+Set automatically removes duplicate values.
+```
+
+Duplicate:
+
+```text
+8826111377
+```
+
+stored only once.
+
+---
+
+# Injecting Map Property
+
+## Bean Property
+
+```java
+private Map<String,String> subMarks;
+```
+
+---
+
+## XML Configuration
+
+```xml
+<property name="subMarks">
+
+    <map>
+
+        <entry key="maths"
+               value="88"/>
+
+        <entry key="science"
+               value="66"/>
+
+        <entry key="english"
+               value="44"/>
+
+    </map>
+
+</property>
+```
+
+---
+
+## Result
+
+```text
+{
+ maths=88,
+ science=66,
+ english=44
+}
+```
+
+---
+
+## Understanding Map Injection
+
+### key
+
+Represents Map Key.
+
+Example:
+
+```xml
+key="maths"
+```
+
+---
+
+### value
+
+Represents Map Value.
+
+Example:
+
+```xml
+value="88"
+```
+
+---
+
+# Complete Bean Configuration
+
+```xml
+<bean id="studentOne"
+      class="com.naresh.hello.Student">
+
+    <property name="stuName" value="Dilip"/>
+    <property name="studId" value="101"/>
+    <property name="avgOfMarks" value="99.88"/>
+    <property name="passedOutYear" value="2022"/>
+    <property name="isSelected" value="true"/>
+
+    <property name="emails">
+        <list>
+            <value>dilip@gmail.com</value>
+            <value>laxmi@gmail.com</value>
+            <value>dilip@gmail.com</value>
+        </list>
+    </property>
+
+    <property name="mobileNumbers">
+        <set>
+            <value>8826111377</value>
+            <value>8826111377</value>
+            <value>+1234567890</value>
+        </set>
+    </property>
+
+    <property name="subMarks">
+        <map>
+            <entry key="maths" value="88"/>
+            <entry key="science" value="66"/>
+            <entry key="english" value="44"/>
+        </map>
+    </property>
+
+</bean>
+```
+
+---
+
+# Complete Output
+
+```text
+101
+Dilip
+2022
+99.88
+true
+
+[dilip@gmail.com,
+ laxmi@gmail.com,
+ dilip@gmail.com]
+
+[8826111377,
+ +1234567890]
+
+{maths=88,
+ science=66,
+ english=44}
+```
+
+---
+
+# Internal Flow
+
+```text
+beans.xml
+      ↓
+Spring Reads Bean Configuration
+      ↓
+Creates Student Object
+      ↓
+Injects Primitive Values
+      ↓
+Injects String Values
+      ↓
+Injects List Values
+      ↓
+Injects Set Values
+      ↓
+Injects Map Values
+      ↓
+Stores Bean In IoC Container
+      ↓
+getBean("studentOne")
+      ↓
+Returns Fully Configured Object
+```
+
+---
+
+# Key Points
+
+- Primitive values are injected using `<property>` tag.
+- String values are injected using `<property>` tag.
+- `name` attribute represents Bean variable name.
+- `value` attribute represents actual value to be injected.
+- `<list>` is used for List injection.
+- `<set>` is used for Set injection.
+- `<map>` is used for Map injection.
+- List allows duplicate values.
+- Set removes duplicate values.
+- Map stores data as Key-Value pairs.
+- Spring performs injection through setter methods.
+
+---
+
+# Quick Revision
+
+| Property Type | XML Tag |
+|--------------|----------|
+| Primitive | `<property>` |
+| String | `<property>` |
+| List | `<list>` |
+| Set | `<set>` |
+| Map | `<map>` |
+
+---
+
+## Conclusion
+
+Spring Setter Injection can inject primitive data types, String values, and Collection data types into Bean objects using XML configuration. Collection injection is supported through `<list>`, `<set>`, and `<map>` tags, allowing Spring to create fully configured Bean objects inside the IoC Container.
