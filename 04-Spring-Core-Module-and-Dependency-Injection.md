@@ -1,94 +1,402 @@
 # Spring Core Module and Dependency Injection
 
-## Introduction
+## Situation
 
-The Spring Core Module is the foundation of the Spring Framework.
+A real application contains many objects.
 
-It provides the fundamental features required for Spring applications, including:
+```text
+Employee
 
-- Inversion of Control (IoC)
-- Dependency Injection (DI)
-- Bean Management
-- Application Context
+Address
 
-Most of Spring's powerful features are built on top of the Core Module.
+Account
+
+Course
+
+Student
+```
+
+Now the questions are:
+
+```text
+Who Creates These Objects?
+
+Who Stores Them?
+
+Who Connects Them Together?
+
+Who Returns Them When Needed?
+```
+
+Managing everything manually becomes difficult as the application grows.
+
+---
+
+## Problem
+
+Traditional Java applications require developers to manage objects directly.
+
+Example:
+
+```java
+Employee emp =
+        new Employee();
+
+Address addr =
+        new Address();
+```
+
+Developer is responsible for:
+
+```text
+Object Creation
+
+Object Management
+
+Dependency Management
+
+Object Relationships
+```
+
+As the number of classes increases:
+
+```text
+More Code
+
+More Maintenance
+
+More Coupling
+```
+
+---
+
+## Solution
+
+Spring introduces:
+
+```text
+Spring Core Container
+```
+
+The container takes responsibility for:
+
+```text
+Creating Objects
+
+Managing Objects
+
+Connecting Objects
+
+Providing Objects
+```
+
+Developer focuses on:
+
+```text
+Business Logic
+```
+
+while Spring handles infrastructure work.
 
 ---
 
 # Spring Core Container
 
-The Spring Core Module consists of three important parts:
+The Spring Core Container is built using three major modules.
 
-## 1. Spring Core
+```text
+Spring Core
+      │
+      ▼
+Spring Beans
+      │
+      ▼
+Spring Context
+```
 
-Spring Core is the heart of the Spring Framework.
-
-It provides support for:
-
-- Inversion of Control (IoC)
-- Dependency Injection (DI)
-- Singleton Design Pattern
-
-### Responsibility
-
-Spring Core manages object creation and dependency management.
-
-Instead of developers creating and managing objects manually, Spring takes care of it.
+Together they provide object management in Spring.
 
 ---
 
-## 2. Spring Bean
+# 1. Spring Core
 
-Spring Bean module provides object management using the BeanFactory mechanism.
+## Situation
 
-A Bean is simply an object managed by the Spring IoC Container.
+Spring must know:
 
-### Responsibility
+```text
+How Objects Should Be Created
 
-- Create Objects
-- Configure Objects
-- Manage Object Lifecycle
-- Handle Dependencies
+How Dependencies Should Be Supplied
+```
 
 ---
 
-## 3. Spring Context
+## Solution
 
-Spring Context is built on top of Core and Bean modules.
+Spring Core provides the rules.
 
-It acts as a container that provides access to all configured Spring objects.
+It introduces:
 
-### Responsibility
+```text
+IoC
 
-- Stores Spring Beans
-- Manages Bean Relationships
-- Provides Application Configuration
+Dependency Injection
+```
+
+---
+
+## What Spring Core Does
+
+```text
+Defines Object Management Rules
+
+Defines Dependency Injection Rules
+
+Provides IoC Mechanism
+```
+
+---
+
+## Internal View
+
+Think of it as:
+
+```text
+Spring Core
+      =
+Framework Brain
+```
+
+It decides:
+
+```text
+How Spring Should Manage Objects
+```
+
+---
+
+# 2. Spring Beans
+
+## Situation
+
+Knowing the rules is not enough.
+
+Spring must actually create objects.
+
+---
+
+## Solution
+
+Spring Beans module performs object management.
+
+---
+
+## What Spring Beans Does
+
+```text
+Create Objects
+
+Configure Objects
+
+Manage Object Lifecycle
+
+Handle Dependencies
+```
+
+---
+
+## Example
+
+```xml
+<bean id="emp"
+      class="Employee"/>
+```
+
+Spring Beans module reads this configuration.
+
+Then internally performs:
+
+```java
+new Employee();
+```
+
+---
+
+## Internal Flow
+
+```text
+Bean Definition
+        │
+        ▼
+Class Identified
+        │
+        ▼
+Object Created
+        │
+        ▼
+Object Stored
+```
+
+---
+
+## Key Observation
+
+A Bean is simply:
+
+```text
+An Object Managed By Spring
+```
+
+---
+
+# 3. Spring Context
+
+## Situation
+
+Objects have been created.
+
+Now the application needs access to them.
+
+---
+
+## Solution
+
+Spring Context provides access to all managed objects.
+
+---
+
+## What Spring Context Does
+
+```text
+Stores Beans
+
+Manages Bean Relationships
+
+Provides Application Configuration
+
+Returns Beans When Requested
+```
+
+---
+
+## Example
+
+```java
+ApplicationContext context =
+new ClassPathXmlApplicationContext(
+        "beans.xml");
+```
+
+Now beans can be accessed using:
+
+```java
+context.getBean("emp");
+```
+
+---
+
+## Internal Flow
+
+```text
+Application
+       │
+       ▼
+ApplicationContext
+       │
+       ▼
+Search Bean
+       │
+       ▼
+Return Bean
+```
+
+---
+
+# Relationship Between Core, Beans and Context
+
+```text
+Spring Core
+       │
+       ▼
+Provides IoC & DI Rules
+
+Spring Beans
+       │
+       ▼
+Creates And Manages Objects
+
+Spring Context
+       │
+       ▼
+Provides Access To Objects
+```
 
 ---
 
 # Understanding Spring Bean
 
-## What is a Bean?
+## Situation
 
-A Bean is a Java object managed by the Spring IoC Container.
+Spring creates an object.
 
-### Simple Definition
-
-> Any object created, configured, and managed by Spring is called a Spring Bean.
-
----
-
-## Traditional Java Object
+Example:
 
 ```java
-Employee emp = new Employee();
+Employee emp =
+        new Employee();
 ```
 
-Here, the developer creates and manages the object manually.
+Now Spring stores and manages this object.
 
 ---
 
-## Spring Bean
+## Result
+
+That object becomes:
+
+```text
+Spring Bean
+```
+
+---
+
+## Key Observation
+
+Not every Java object is a Bean.
+
+```text
+Java Object
+      +
+Managed By Spring
+      =
+Spring Bean
+```
+
+---
+
+# Traditional Object vs Spring Bean
+
+## Traditional Java
+
+```java
+Employee emp =
+        new Employee();
+```
+
+Developer:
+
+```text
+Creates Object
+
+Stores Object
+
+Manages Object
+```
+
+---
+
+## Spring
 
 ```java
 @Component
@@ -96,69 +404,101 @@ public class Employee {
 }
 ```
 
-Spring automatically creates and manages the object.
+Spring:
 
-### Benefit
+```text
+Creates Object
 
-Developers do not need to worry about object creation and lifecycle management.
+Stores Object
+
+Manages Object
+```
+
+---
+
+## Flow
+
+```text
+Class Found
+      │
+      ▼
+Spring Creates Object
+      │
+      ▼
+Object Managed By Container
+      │
+      ▼
+Becomes Bean
+```
 
 ---
 
 # Dependency Injection (DI)
 
-## What is Dependency?
+## Situation
 
-A dependency exists when one class requires another class to perform its work.
-
-### Example
-
-Consider two classes:
+Employee needs Address.
 
 ```text
 Employee
-    ↓
+     │
+     ▼
 Address
 ```
 
-Employee uses Address.
-
-Therefore:
-
-> Employee depends on Address.
+Employee depends on Address.
 
 ---
 
-## Real-Life Example
+## What Is A Dependency?
 
-A Car depends on an Engine.
-
-Without an Engine:
+When one class requires another class to perform its work:
 
 ```text
-Car ❌ Cannot Function
+Dependency Exists
 ```
 
-With an Engine:
+Example:
 
 ```text
-Car ✅ Can Function
+Employee Uses Address
+
+Employee Depends On Address
+```
+
+---
+
+# Real World Example
+
+```text
+Car
+ │
+ ▼
+Engine
+```
+
+Without Engine:
+
+```text
+Car Cannot Work
 ```
 
 Similarly:
 
 ```text
 Employee
-    ↓
+ │
+ ▼
 Address
 ```
 
-Employee requires Address to function properly.
+Employee needs Address.
 
 ---
 
 # Traditional Approach
 
-Without Dependency Injection:
+## Code
 
 ```java
 public class Employee {
@@ -166,177 +506,408 @@ public class Employee {
     private Address addr;
 
     public Employee() {
-        this.addr = new Address();
+
+        addr =
+            new Address();
     }
 }
 ```
 
-### Problem
+---
+
+## What Happens?
 
 Employee creates Address itself.
 
-This causes:
+Flow:
 
-- Tight Coupling
-- Difficult Testing
-- Difficult Maintenance
+```text
+Employee
+     │
+Creates
+     ▼
+Address
+```
 
 ---
 
-## Why is This a Problem?
+## Problem
 
-Suppose Address changes.
+Employee is tightly connected to Address.
 
-```java
-Address address = new Address();
-```
+Changes become harder.
 
-Every dependent class may need modification.
+Testing becomes harder.
 
-As applications grow larger, maintenance becomes difficult.
+Replacing Address becomes harder.
 
 ---
 
 # Dependency Injection Approach
 
-Using Dependency Injection:
+## Code
 
 ```java
 public class Employee {
 
     private Address addr;
 
-    public Employee(Address addr) {
+    public Employee(
+            Address addr) {
+
         this.addr = addr;
     }
 }
 ```
 
-### What Changed?
+---
+
+## What Changed?
 
 Employee no longer creates Address.
 
-Instead:
-
-- Address is provided from outside.
-- Spring supplies the required dependency.
+Employee only receives Address.
 
 ---
 
-## Dependency Flow
-
-Without DI:
+## Flow
 
 ```text
-Employee
-    ↓ Creates
-Address
-```
-
-With DI:
-
-```text
-Spring Container
-      ↓ Injects
-Employee
-      ↓ Uses
-Address
+Address Created
+        │
+        ▼
+Address Supplied
+        │
+        ▼
+Employee Uses Address
 ```
 
 ---
 
-# How Spring Performs Dependency Injection
+## Key Observation
 
-Spring can inject dependencies using:
+Employee focuses on:
+
+```text
+Using Address
+```
+
+not
+
+```text
+Creating Address
+```
+
+---
+
+# How Spring Performs DI
+
+## Step 1
+
+Spring creates dependency.
+
+```java
+Address addr =
+        new Address();
+```
+
+---
+
+## Step 2
+
+Spring creates Employee.
+
+```java
+Employee emp =
+        new Employee(addr);
+```
+
+---
+
+## Result
+
+Dependency automatically connected.
+
+---
+
+## Complete Flow
+
+```text
+Address Bean Created
+         │
+         ▼
+Employee Bean Created
+         │
+         ▼
+Address Injected
+         │
+         ▼
+Employee Ready
+```
+
+---
+
+# Types of Dependency Injection
 
 ## Constructor Injection
 
+Dependency supplied during object creation.
+
 ```java
-public Employee(Address addr) {
+public Employee(
+        Address addr) {
+
     this.addr = addr;
 }
 ```
 
-Recommended approach in most applications.
+---
+
+## Internal Flow
+
+```text
+Dependency Created
+        │
+        ▼
+Constructor Called
+        │
+        ▼
+Object Ready
+```
 
 ---
 
 ## Setter Injection
 
+Dependency supplied after object creation.
+
 ```java
-public void setAddress(Address addr) {
+public void setAddress(
+        Address addr) {
+
     this.addr = addr;
 }
 ```
 
-Dependency is provided through setter methods.
+---
+
+## Internal Flow
+
+```text
+Object Created
+        │
+        ▼
+Setter Called
+        │
+        ▼
+Dependency Injected
+```
 
 ---
 
 ## Field Injection
+
+Dependency injected directly into field.
 
 ```java
 @Autowired
 private Address addr;
 ```
 
-Spring injects the dependency directly into the field.
+---
+
+## Internal Flow
+
+```text
+Object Created
+        │
+        ▼
+Spring Finds Field
+        │
+        ▼
+Dependency Injected
+```
+
+---
+
+# IoC vs DI
+
+Many beginners treat them as the same thing.
+
+They are related but different.
+
+---
+
+## IoC
+
+### Question
+
+Who controls object creation?
+
+---
+
+### Traditional Java
+
+```text
+Developer Creates Objects
+```
+
+---
+
+### Spring
+
+```text
+Spring Creates Objects
+```
+
+Control moves from:
+
+```text
+Developer
+```
+
+to
+
+```text
+Spring Container
+```
+
+This idea is:
+
+```text
+Inversion Of Control
+```
+
+---
+
+# DI
+
+### Question
+
+How does Spring connect objects?
+
+---
+
+### Answer
+
+By supplying dependencies automatically.
+
+Example:
+
+```java
+Employee(Address addr)
+```
+
+Spring provides:
+
+```java
+addr
+```
+
+This technique is:
+
+```text
+Dependency Injection
+```
 
 ---
 
 # Relationship Between IoC and DI
 
-Many beginners confuse these concepts.
+```text
+IoC
+ │
+ ▼
+Spring Controls Objects
 
-## Inversion of Control (IoC)
+DI
+ │
+ ▼
+Spring Connects Objects
+```
 
-IoC is the principle.
-
-> Spring controls object creation and management.
-
----
-
-## Dependency Injection (DI)
-
-DI is the technique used to achieve IoC.
-
-> Spring injects required dependencies into objects.
-
-### Simple Formula
+Or simply:
 
 ```text
-IoC = Principle
+IoC
+=
+Goal
 
-DI = Implementation Technique
+DI
+=
+Mechanism Used To Achieve It
 ```
 
 ---
 
-# Benefits of Dependency Injection
+# End-To-End Flow
 
-- Loose Coupling
-- Better Code Reusability
-- Easier Testing
-- Easier Maintenance
-- Better Scalability
-- Cleaner Design
+```text
+Application Starts
+         │
+         ▼
+Spring Container Starts
+         │
+         ▼
+Bean Definitions Found
+         │
+         ▼
+Objects Created
+         │
+         ▼
+Dependencies Created
+         │
+         ▼
+Dependencies Injected
+         │
+         ▼
+Beans Stored
+         │
+         ▼
+Application Requests Bean
+         │
+         ▼
+Spring Returns Bean
+```
 
 ---
 
-# Key Points to Remember
+# Key Observation
 
-- Spring Core Module is the foundation of Spring Framework.
-- Spring Core provides IoC and DI.
-- Spring Bean represents objects managed by Spring.
-- Spring Context provides access to configured beans.
-- Dependency exists when one class uses another class.
-- Dependency Injection means providing dependencies from outside.
-- Spring supports Constructor, Setter, and Field Injection.
-- DI helps achieve Loose Coupling.
-- IoC is the concept, and DI is the implementation technique.
+Spring Core is fundamentally solving one problem:
 
----
+```text
+How To Manage Objects Efficiently
+```
 
-# Conclusion
+It does this by:
 
-The Spring Core Module provides the foundation for Spring Framework through IoC, Dependency Injection, Bean Management, and Application Context. Dependency Injection allows Spring to provide required objects automatically, resulting in loosely coupled, maintainable, and scalable applications.
+```text
+Creating Objects
+
+Managing Objects
+
+Connecting Objects
+
+Providing Objects
+```
+
+The heart of Spring Core is:
+
+```text
+IoC
+      +
+Dependency Injection
+```
+
+because once Spring controls object creation and dependency management, applications become:
+
+```text
+Loosely Coupled
+
+Easier To Test
+
+Easier To Maintain
+
+Easier To Scale
+```
