@@ -1,6 +1,8 @@
-# 08. Injecting Primitive, String and Collection Properties
+# Injecting Primitive, String and Collection Properties
 
-A Student object contains data such as:
+## Why Do We Need Property Injection?
+
+A `Student` object contains data such as:
 
 - Name
 - Id
@@ -8,50 +10,39 @@ A Student object contains data such as:
 - Passed Out Year
 - Selection Status
 
-Without Spring, values must be supplied manually.
+Without Spring, every value must be supplied manually.
 
 ```java
-Student student =
-        new Student();
+Student student = new Student();
 
-student.setStuName(
-        "Dilip");
-
-student.setStudId(
-        101);
-
-student.setAvgOfMarks(
-        99.88);
-
-student.setPassedOutYear(
-        (short)2022);
-
-student.setSelected(
-        true);
+student.setStuName("Dilip");
+student.setStudId(101);
+student.setAvgOfMarks(99.88);
+student.setPassedOutYear((short)2022);
+student.setSelected(true);
 ```
 
-As the number of objects increases, manually supplying values becomes repetitive.
+As the number of objects increases, manually setting values becomes repetitive.
 
-Spring can perform the same work automatically.
+Spring can perform this work automatically.
 
 ---
 
-Spring uses:
+## Solution
 
-```xml
-<property>
-```
-
-to supply values into bean properties.
+Spring uses the `<property>` tag to inject values into bean properties.
 
 ```text
-Spring Creates Object
+Spring Creates Bean
          │
          ▼
-Spring Calls Setter Methods
+Reads <property>
          │
          ▼
-Values Injected
+Calls Setter Method
+         │
+         ▼
+Value Injected
 ```
 
 ---
@@ -62,13 +53,9 @@ Values Injected
 public class Student {
 
     private String stuName;
-
     private int studId;
-
     private double avgOfMarks;
-
     private short passedOutYear;
-
     private boolean isSelected;
 
 }
@@ -76,90 +63,87 @@ public class Student {
 
 ---
 
-## XML Configuration
+## Bean Configuration
 
 ```xml
 <bean id="studentOne"
       class="com.naresh.hello.Student">
 
-    <property
-            name="stuName"
-            value="Dilip"/>
+    <property name="stuName"
+              value="Dilip"/>
 
-    <property
-            name="studId"
-            value="101"/>
+    <property name="studId"
+              value="101"/>
 
-    <property
-            name="avgOfMarks"
-            value="99.88"/>
+    <property name="avgOfMarks"
+              value="99.88"/>
 
-    <property
-            name="passedOutYear"
-            value="2022"/>
+    <property name="passedOutYear"
+              value="2022"/>
 
-    <property
-            name="isSelected"
-            value="true"/>
+    <property name="isSelected"
+              value="true"/>
 
 </bean>
 ```
 
 ---
 
-## What Spring Does
+## How Spring Injects Values
 
-Spring creates the object:
+Spring first creates the object.
 
 ```java
-Student student =
-        new Student();
+Student student = new Student();
 ```
 
-Spring reads:
+Then Spring reads:
 
 ```xml
-<property
-        name="stuName"
-        value="Dilip"/>
+<property name="stuName"
+          value="Dilip"/>
 ```
 
-Spring calls:
+and calls:
 
 ```java
-student.setStuName(
-        "Dilip");
+student.setStuName("Dilip");
+```
+
+Similarly:
+
+```xml
+<property name="studId"
+          value="101"/>
+```
+
+becomes:
+
+```java
+student.setStudId(101);
 ```
 
 ---
 
-Spring reads:
-
-```xml
-<property
-        name="studId"
-        value="101"/>
-```
-
-Spring calls:
-
-```java
-student.setStudId(
-        101);
-```
-
----
-
-Flow:
+## Internal Flow
 
 ```text
-XML Value
+beans.xml
       │
       ▼
-Setter Method
+Bean Created
       │
       ▼
-Bean Property
+Property Read
+      │
+      ▼
+Matching Setter Found
+      │
+      ▼
+Setter Executed
+      │
+      ▼
+Value Stored
 ```
 
 ---
@@ -167,11 +151,10 @@ Bean Property
 ## Understanding name
 
 ```xml
-<property
-        name="stuName"/>
+<property name="stuName"/>
 ```
 
-Spring searches for:
+Spring looks for:
 
 ```java
 private String stuName;
@@ -180,7 +163,7 @@ private String stuName;
 and
 
 ```java
-setStuName();
+setStuName(...)
 ```
 
 The `name` attribute must match the bean property.
@@ -190,80 +173,50 @@ The `name` attribute must match the bean property.
 ## Understanding value
 
 ```xml
-<property
-        name="stuName"
-        value="Dilip"/>
+<property name="stuName"
+          value="Dilip"/>
 ```
 
-The `value` attribute contains the actual data to inject.
+The `value` attribute contains the actual data that Spring injects.
 
 ---
 
 ## Automatic Type Conversion
 
-XML values are always read as text.
+XML values are read as text.
 
-Spring automatically converts them.
+Spring automatically converts them to the required datatype.
+
+| XML Value | Converted To |
+|------------|-------------|
+| "101" | int |
+| "99.88" | double |
+| "2022" | short |
+| "true" | boolean |
+
+Example:
 
 ```xml
 value="101"
 ```
 
-becomes
+becomes:
 
 ```java
 int
 ```
 
----
-
-```xml
-value="99.88"
-```
-
-becomes
-
-```java
-double
-```
+without manual conversion.
 
 ---
 
-```xml
-value="2022"
-```
-
-becomes
-
-```java
-short
-```
-
----
-
-```xml
-value="true"
-```
-
-becomes
-
-```java
-boolean
-```
-
----
-
-## Output
+## Result
 
 ```text
 101
-
 Dilip
-
 2022
-
 99.88
-
 true
 ```
 
@@ -271,9 +224,7 @@ true
 
 # Collection Injection
 
-A bean may contain collections.
-
-Example:
+A bean can also contain collections.
 
 ```java
 private List<String> emails;
@@ -283,19 +234,23 @@ private Set<String> mobileNumbers;
 private Map<String,String> subMarks;
 ```
 
-Spring can inject these collections automatically.
+Spring can inject entire collections using XML.
 
 ---
 
 # List Injection
 
-Emails:
+## Situation
+
+A student can have multiple email addresses.
 
 ```java
 private List<String> emails;
 ```
 
-XML:
+---
+
+## Configuration
 
 ```xml
 <property name="emails">
@@ -313,7 +268,22 @@ XML:
 </property>
 ```
 
-Result:
+---
+
+## What Spring Does
+
+```java
+List<String> emails =
+        new ArrayList<>();
+
+emails.add("dilip@gmail.com");
+emails.add("laxmi@gmail.com");
+emails.add("dilip@gmail.com");
+```
+
+---
+
+## Result
 
 ```text
 [dilip@gmail.com,
@@ -321,35 +291,31 @@ Result:
  dilip@gmail.com]
 ```
 
-Observation:
+---
+
+## Key Observation
 
 ```text
-List keeps duplicates.
-```
+List preserves order.
 
-Flow:
-
-```text
-Values Added
-      │
-      ▼
-Stored In Order
-      │
-      ▼
-Duplicates Preserved
+List allows duplicates.
 ```
 
 ---
 
 # Set Injection
 
-Mobile Numbers:
+## Situation
+
+Mobile numbers should be unique.
 
 ```java
 private Set<String> mobileNumbers;
 ```
 
-XML:
+---
+
+## Configuration
 
 ```xml
 <property name="mobileNumbers">
@@ -367,66 +333,89 @@ XML:
 </property>
 ```
 
-Result:
+---
+
+## What Spring Does
+
+```java
+Set<String> mobiles =
+        new HashSet<>();
+
+mobiles.add("8826111377");
+mobiles.add("8826111377");
+mobiles.add("+1234567890");
+```
+
+---
+
+## Result
 
 ```text
 [8826111377,
  +1234567890]
 ```
 
-Observation:
+---
+
+## Key Observation
 
 ```text
-Set removes duplicates.
-```
+Set stores unique values.
 
-Flow:
-
-```text
-Values Added
-      │
-      ▼
-Duplicate Found
-      │
-      ▼
-Duplicate Removed
+Duplicate entries are removed.
 ```
 
 ---
 
 # Map Injection
 
-Subject Marks:
+## Situation
+
+Subject names must be associated with marks.
 
 ```java
 private Map<String,String> subMarks;
 ```
 
-XML:
+---
+
+## Configuration
 
 ```xml
 <property name="subMarks">
 
     <map>
 
-        <entry
-                key="maths"
-                value="88"/>
+        <entry key="maths"
+               value="88"/>
 
-        <entry
-                key="science"
-                value="66"/>
+        <entry key="science"
+               value="66"/>
 
-        <entry
-                key="english"
-                value="44"/>
+        <entry key="english"
+               value="44"/>
 
     </map>
 
 </property>
 ```
 
-Result:
+---
+
+## What Spring Does
+
+```java
+Map<String,String> marks =
+        new HashMap<>();
+
+marks.put("maths", "88");
+marks.put("science", "66");
+marks.put("english", "44");
+```
+
+---
+
+## Result
 
 ```text
 {
@@ -436,7 +425,9 @@ Result:
 }
 ```
 
-Observation:
+---
+
+## Key Observation
 
 ```text
 Map stores data as:
@@ -448,9 +439,7 @@ Example:
 
 ```text
 maths   → 88
-
 science → 66
-
 english → 44
 ```
 
@@ -458,76 +447,35 @@ english → 44
 
 # Collection Comparison
 
-## List
+| Collection | Stores | Duplicates | Order |
+|------------|---------|------------|--------|
+| List | Values | Allowed | Preserved |
+| Set | Values | Not Allowed | Not Guaranteed |
+| Map | Key → Value | Keys Unique | Key-Based |
+
+---
+
+## Internal Flow of Collection Injection
 
 ```text
-Stores Values
-
-Keeps Duplicates
-
-Maintains Order
-```
-
-Example:
-
-```text
-A
-A
-B
-```
-
-Result:
-
-```text
-A
-A
-B
+XML Collection
+        │
+        ▼
+Spring Creates Collection Object
+        │
+        ▼
+Values Added
+        │
+        ▼
+Collection Assigned To Bean
+        │
+        ▼
+Bean Stored In Container
 ```
 
 ---
 
-## Set
-
-```text
-Stores Unique Values
-
-Removes Duplicates
-```
-
-Example:
-
-```text
-A
-A
-B
-```
-
-Result:
-
-```text
-A
-B
-```
-
----
-
-## Map
-
-```text
-Stores Key → Value Pairs
-```
-
-Example:
-
-```text
-Maths → 88
-
-Science → 66
-```
-
----
-
-# Complete Flow
+# Complete Spring Flow
 
 ```text
 beans.xml
@@ -536,7 +484,7 @@ beans.xml
 Spring Container Starts
       │
       ▼
-Bean Object Created
+Student Object Created
       │
       ▼
 Setter Methods Located
@@ -548,20 +496,20 @@ Primitive Values Injected
 Collection Values Injected
       │
       ▼
-Bean Stored In Container
+Bean Stored In IoC Container
       │
       ▼
 getBean()
       │
       ▼
-Ready Object Returned
+Fully Configured Object Returned
 ```
 
 ---
 
 # Real Usage
 
-List:
+### List
 
 ```text
 Email Addresses
@@ -571,9 +519,7 @@ Skills
 Course Names
 ```
 
----
-
-Set:
+### Set
 
 ```text
 Roles
@@ -583,9 +529,7 @@ Permissions
 Unique Phone Numbers
 ```
 
----
-
-Map:
+### Map
 
 ```text
 Subject → Marks
@@ -597,49 +541,41 @@ Country → Capital
 
 ---
 
-# Quick Revision
+# Key Takeaways
 
-```xml
+```text
 <property>
+        ↓
+Setter Injection
 ```
 
-Used for Setter Injection.
-
----
-
-```xml
+```text
 <list>
+        ↓
+Duplicates Allowed
 ```
 
-Duplicates Allowed.
-
----
-
-```xml
+```text
 <set>
+        ↓
+Duplicates Removed
 ```
 
-Duplicates Removed.
-
----
-
-```xml
+```text
 <map>
+        ↓
+Key → Value Storage
 ```
-
-Key → Value Storage.
-
----
 
 ```text
 Spring Reads XML
-      │
-      ▼
-Calls Setter
-      │
-      ▼
-Injects Value
-      │
-      ▼
+        │
+        ▼
+Calls Setter Methods
+        │
+        ▼
+Injects Values
+        │
+        ▼
 Bean Ready
 ```
