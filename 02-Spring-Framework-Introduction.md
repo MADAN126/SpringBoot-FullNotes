@@ -1,237 +1,605 @@
-# Spring Framework Introduction
-
-## The Problem
-
-Consider a Banking Application.
-
-Requirements:
-
-```text
-Create Account
-
-Transfer Money
-
-Generate Statement
-
-Check Balance
-```
-
-These are the actual business features.
+# Spring vs Spring Boot — Why Spring Boot Came Into the Picture
 
 ---
 
-But building the application requires much more than business logic.
+# Big Picture
 
-Developers also need to handle:
+Before understanding Spring Boot, we must understand:
 
-```text
-Object Creation
-
-Object Communication
-
-Database Access
-
-Transactions
-
-Security
-
-Logging
-
-Exception Handling
+```
+Programming Language
+        ↓
+Framework
+        ↓
+Spring Framework
+        ↓
+Microservices Architecture
+        ↓
+Problems with Spring
+        ↓
+Spring Boot
 ```
 
-As applications grow, managing these concerns manually becomes difficult.
+Spring Boot did NOT replace Spring.
+
+Spring Boot was created to make Spring easier and more suitable for modern application development, especially Microservices.
 
 ---
 
-## Why Spring Was Created
+# Why Frameworks Exist
 
-Developers should spend most of their time solving business problems.
+## Situation
+
+A company wants to build a software application.
+
+Examples:
+
+- Amazon
+- Flipkart
+- Banking Applications
+- Hospital Management Systems
+
+---
+
+## Problem
+
+Using only Java takes a lot of effort.
+
+Developers must repeatedly write:
+
+- Database code
+- Request handling code
+- Security code
+- Configuration code
+- Exception handling code
+
+Result:
+
+- More coding
+- More time
+- More maintenance
+
+---
+
+## Solution
+
+Use a Framework.
+
+Frameworks already provide solutions for common problems.
+
+Developer focuses mainly on:
+
+```
+Business Requirement
+      ↓
+Implementation
+```
+
+instead of
+
+```
+Database Setup
+Request Processing
+Security Setup
+Configuration
+Boilerplate Code
+```
+
+---
+
+## Result
+
+Applications can be built:
+
+| Without Framework | With Framework |
+|----------|----------|
+| Slow | Fast |
+| More Code | Less Code |
+| Repeated Logic | Reusable Solutions |
+| High Effort | Lower Effort |
+
+---
+
+# Java Before Spring
+
+## Situation
+
+Developers used:
+
+```text
+Core Java
++
+Advanced Java
+```
+
+Advanced Java mainly included:
+
+- JDBC
+- Servlets
+- JSP
+
+---
+
+## Why JDBC?
+
+Java applications need database access.
 
 Example:
 
 ```text
-Bank Employee Cares About
-
-Account Creation
-
-Money Transfer
-
-Statement Generation
+Save User
+Update User
+Delete User
+Fetch User
 ```
 
-Not:
+JDBC provides communication between:
 
 ```text
-How Objects Are Created
-
-How Dependencies Are Connected
-
-How Transactions Are Managed
+Java
+   ↓
+Database
 ```
-
-Spring was created to handle these common infrastructure problems so developers can focus on business requirements.
 
 ---
 
-# What Spring Actually Does
+## Why Servlets?
 
-Spring sits between your application components and manages many repetitive tasks.
+For web applications.
+
+Example:
 
 ```text
-Application Components
-           │
-           ▼
-      Spring
-           │
-           ▼
-Infrastructure Support
+Browser
+   ↓
+Request
+   ↓
+Servlet
+   ↓
+Response
+   ↓
+Browser
 ```
-
-Instead of manually managing everything, developers let Spring manage it.
 
 ---
 
-## Example
+# Additional Frameworks Before Spring
 
-Without Spring:
+Developers used different frameworks for different purposes.
+
+| Requirement | Framework |
+|------------|------------|
+| Web Development | Struts |
+| Database Operations | Hibernate |
+| Persistence Standard | JPA |
+| Enterprise Components | EJB |
+
+---
+
+## Problem
+
+A Java application looked like:
+
+```text
+Java
+ +
+ Struts
+ +
+ Hibernate
+ +
+ JPA
+ +
+ EJB
+ +
+ Security Framework
+ +
+ Other Libraries
+```
+
+Everything came from different vendors.
+
+Developers had to integrate everything manually.
+
+---
+
+# Birth of Spring Framework
+
+## Situation
+
+Developers were using many separate frameworks.
+
+---
+
+## Problem
+
+```text
+Different Frameworks
+        ↓
+Different Configurations
+        ↓
+Integration Complexity
+        ↓
+More Development Time
+```
+
+---
+
+## Spring Team's Idea
+
+Instead of using:
+
+```text
+Framework A
+Framework B
+Framework C
+Framework D
+```
+
+Why not provide everything under one framework?
+
+---
+
+# Spring Framework Solution
+
+Spring started providing solutions for:
+
+| Area | Spring Module |
+|--------|--------|
+| Database | Spring JDBC / Spring Data |
+| Web Applications | Spring MVC |
+| Security | Spring Security |
+| Dependency Management | Spring Core |
+| Exception Handling | Spring Modules |
+| Transaction Management | Spring Transactions |
+
+---
+
+## Internal Idea
+
+```
+Real Java Application Requirements
+                ↓
+Spring Collects Solutions
+                ↓
+Packages Everything
+                ↓
+Spring Framework
+```
+
+---
+
+# Why Spring Became Popular
+
+Before Spring:
+
+```text
+Developer
+    ↓
+Collect Frameworks
+    ↓
+Integrate Manually
+    ↓
+Build Application
+```
+
+After Spring:
+
+```text
+Developer
+     ↓
+Use Spring
+     ↓
+Get Everything
+     ↓
+Build Application
+```
+
+---
+
+## Result
+
+Spring gradually replaced:
+
+- Struts
+- EJB-based development
+- Many isolated framework combinations
+
+Spring became the dominant Java framework.
+
+---
+
+# Monolithic Architecture
+
+---
+
+## Situation
+
+Suppose we build Amazon.
+
+Features:
+
+- User Registration
+- Login
+- Products
+- Orders
+- Payments
+- Delivery
+- Returns
+
+---
+
+## Traditional Approach
+
+Everything is developed inside ONE application.
+
+```text
+Amazon Application
+    ├─ Users
+    ├─ Products
+    ├─ Orders
+    ├─ Payments
+    ├─ Delivery
+    └─ Returns
+```
+
+---
+
+## Official Name
+
+**Monolithic Architecture**
+
+Mono = Single
+
+Meaning:
+
+```text
+All Functionalities
+        ↓
+Single Project
+```
+
+---
+
+# Monolithic Flow
+
+```text
+Requirements
+      ↓
+Single Project
+      ↓
+Single Deployment
+      ↓
+Single Server
+      ↓
+Application Running
+```
+
+---
+
+# Example
+
+```text
+AmazonProject
+```
+
+contains:
 
 ```java
-Address address =
-        new Address();
-
-Customer customer =
-        new Customer();
-
-customer.setAddress(
-        address);
+Users
+Products
+Orders
+Payments
+Delivery
+Returns
 ```
 
-Developer creates and connects objects manually.
+everything inside one application.
 
 ---
 
-With Spring:
+# Advantages of Monolithic
 
-```text
-Spring Creates Objects
-
-Spring Connects Objects
-
-Spring Manages Lifecycle
-```
-
-Developer focuses on application logic.
+- Simple Development
+- Easy Deployment
+- Single Server
+- Easy Testing
 
 ---
 
-# Loose Coupling
+# Industry Shift
 
-Consider:
+Technology keeps evolving.
 
-```text
-Customer
-      │
-      ▼
-Address
-```
+Developers started facing problems with large monolithic applications.
 
-Customer depends on Address.
+Companies needed:
 
-If Customer creates Address directly:
-
-```java
-Address address =
-        new Address();
-```
-
-Customer becomes tightly connected to Address.
-
-Changing Address later becomes harder.
+- Better Performance
+- Better Scalability
+- Better Maintainability
 
 ---
 
-Instead:
+# Birth of Microservices
+
+Around the industry shift period, companies introduced:
+
+## Microservices Architecture
+
+---
+
+# Core Idea of Microservices
+
+Instead of:
 
 ```text
-Spring Creates Address
-         │
-         ▼
-Spring Supplies Address
-         │
-         ▼
-Customer Uses Address
+One Big Application
 ```
 
-Customer only uses the dependency.
-
-Spring manages the dependency.
-
-This approach is called:
+Create:
 
 ```text
-Loose Coupling
+Many Small Applications
 ```
 
 ---
 
-## Why Loose Coupling Matters
+# Rule of Microservices
 
-```text
-Easier Maintenance
-
-Easier Testing
-
-Easier Modification
-
-Better Scalability
-```
-
-Applications become easier to change without affecting multiple components.
+Each functionality should become an independent service.
 
 ---
 
-# Dependency Injection (DI)
+# Amazon Example
 
-Imagine:
+Instead of:
 
 ```text
-Customer Needs Address
+AmazonProject
 ```
 
-Without Spring:
+Create:
 
-```java
-Address address =
-        new Address();
-
-Customer customer =
-        new Customer();
-
-customer.setAddress(
-        address);
+```text
+User Service
+Product Service
+Order Service
+Payment Service
+Delivery Service
+Return Service
 ```
 
-Developer manually supplies the dependency.
+Each becomes its own project.
 
 ---
 
-With Spring:
+# Microservices Flow
 
 ```text
-Spring Creates Address
-         │
-         ▼
-Spring Injects Address
-         │
-         ▼
-Customer Ready
+Amazon Requirements
+        ↓
+Split Functionalities
+        ↓
+Create Individual Services
+        ↓
+Deploy Separately
+        ↓
+Communicate Together
 ```
 
-The process of supplying required objects is called:
+---
+
+# Visual Representation
+
+## Monolithic
 
 ```text
-Dependency Injection
+AmazonProject
+    ├─ Users
+    ├─ Products
+    ├─ Orders
+    ├─ Payments
+    └─ Delivery
+```
+
+---
+
+## Microservices
+
+```text
+User Service
+
+Product Service
+
+Order Service
+
+Payment Service
+
+Delivery Service
+
+Return Service
+```
+
+Independent applications.
+
+---
+
+# How Services Communicate
+
+A service often needs another service.
+
+Example:
+
+```text
+Order Service
+       ↓
+Payment Service
+```
+
+Communication happens using APIs.
+
+Most common approach:
+
+```text
+REST APIs
+```
+
+---
+
+# New Problem Introduced
+
+Microservices solve many business problems.
+
+But they introduce developer challenges.
+
+---
+
+## Situation
+
+You have:
+
+```text
+9 Microservices
+```
+
+---
+
+## Problem
+
+Each service is a web application.
+
+Each service needs deployment.
+
+Example:
+
+```text
+User Service
+     ↓
+Tomcat
+
+Order Service
+     ↓
+Tomcat
+
+Payment Service
+     ↓
+Tomcat
+```
+
+---
+
+# Spring Framework Challenge
+
+A Spring Web Application requires:
+
+```text
+External Web Server
+```
+
+Example:
+
+```text
+Tomcat
 ```
 
 ---
@@ -239,394 +607,368 @@ Dependency Injection
 ## Internal Flow
 
 ```text
-Bean Created
-      │
-      ▼
-Dependency Created
-      │
-      ▼
-Dependency Injected
-      │
-      ▼
-Object Ready
+Spring Application
+        ↓
+Build WAR
+        ↓
+Deploy to Tomcat
+        ↓
+Start Server
+        ↓
+Run Application
 ```
 
 ---
 
-# Inversion of Control (IoC)
-
-Normally:
-
-```text
-Developer Creates Objects
-```
-
-Example:
-
-```java
-Customer customer =
-        new Customer();
-```
-
-Developer controls object creation.
-
----
-
-With Spring:
-
-```text
-Spring Creates Objects
-```
-
-Example:
-
-```text
-Container Starts
-        │
-        ▼
-Spring Creates Beans
-        │
-        ▼
-Spring Stores Beans
-        │
-        ▼
-Application Uses Beans
-```
-
-Control moves from developer to Spring.
-
-This is called:
-
-```text
-Inversion of Control
-```
-
----
-
-## Relationship Between IoC and DI
-
-```text
-IoC
- │
- ▼
-Spring Controls Objects
-```
-
-```text
-DI
- │
- ▼
-Spring Supplies Dependencies
-```
-
-Dependency Injection is one way Spring achieves IoC.
-
----
-
-# Aspect-Oriented Programming (AOP)
-
-Many features are needed in multiple places.
-
-Example:
-
-```text
-Logging
-
-Security
-
-Transactions
-```
+# Microservices + Spring Problem
 
 Suppose:
 
 ```text
-Transfer Money
-
-Create Account
-
-Close Account
+9 Services
 ```
 
-All three operations need logging.
-
-Without AOP:
+Need:
 
 ```text
-Logging Code
-
-Business Code
-
-Logging Code
-
-Business Code
-
-Logging Code
-
-Business Code
+9 Deployments
+9 Configurations
+9 Server Management Tasks
 ```
 
-Repeated everywhere.
+Developer effort increases.
 
 ---
 
-With AOP:
+# Spring Team Observes the Problem
 
-```text
-Business Logic
-      │
-      ▼
-Spring Adds Logging
-Automatically
-```
+## Situation
 
-Business code remains clean.
+Microservices are becoming popular.
+
+Developers are using Spring.
 
 ---
 
-## Internal Flow
+## Problem
 
-```text
-Request
-      │
-      ▼
-Security Check
-      │
-      ▼
-Logging
-      │
-      ▼
-Business Logic
-      │
-      ▼
-Response
-```
+Spring works.
 
-Spring can apply these extra steps automatically.
+But development becomes difficult in microservice environments.
+
+Examples:
+
+- Server Management
+- Deployment Complexity
+- Configuration Overhead
+- Development Setup
 
 ---
 
-# Spring MVC
+## Solution
 
-Web applications receive requests from users.
+Upgrade Spring.
 
-Example:
+Provide built-in solutions.
 
-```text
-/login
-
-/register
-
-/transfer
-
-/accounts
-```
-
-Someone must decide:
-
-```text
-Which Code Handles
-Which Request
-```
-
-Spring MVC manages this process.
+Reduce developer effort.
 
 ---
 
-## Request Flow
+# Birth of Spring Boot
+
+Spring Team created:
 
 ```text
-User Request
-      │
-      ▼
-Spring MVC
-      │
-      ▼
-Controller
-      │
-      ▼
-Business Logic
-      │
-      ▼
-Response
+Spring Boot
 ```
 
-This makes web application development easier.
-
----
-
-# Integration Support
-
-Applications rarely work alone.
-
-They often communicate with:
+Released around:
 
 ```text
-Databases
-
-Messaging Systems
-
-ORM Frameworks
-
-External Services
-```
-
-Spring provides easy integration with technologies such as:
-
-```text
-Hibernate
-
-JPA
-
-JMS
+2014
 ```
 
 ---
 
-## Example Flow
+# What Exactly Is Spring Boot?
+
+The most important understanding:
 
 ```text
-Application
-      │
-      ▼
+Spring Boot
+      =
 Spring
-      │
-      ▼
-Hibernate
-      │
-      ▼
-Database
+      +
+Additional Features
 ```
-
-Spring acts as the bridge between different technologies.
 
 ---
 
-# Spring Ecosystem
+## Not a Replacement
 
-As application requirements increased, Spring expanded into multiple projects.
+Wrong Thinking:
+
+```text
+Spring OR Spring Boot
+```
+
+Correct Thinking:
+
+```text
+Spring
+     ↓
+Enhanced
+     ↓
+Spring Boot
+```
+
+---
+
+# Internal Relationship
 
 ```text
 Spring Framework
-        │
-        ├── Spring Boot
-        │
-        ├── Spring Security
-        │
-        ├── Spring Data
-        │
-        ├── Spring Cloud
-        │
-        └── Spring Batch
+         ↓
+Added Features
+         ↓
+Spring Boot
 ```
 
-Each project focuses on solving a specific problem.
+---
+
+# Why Spring Boot Was Created
+
+Main Goal:
+
+```text
+Support Modern Development
+```
+
+especially:
+
+```text
+Microservices
+```
+
+---
+
+# Biggest Feature
+
+## Spring
+
+Needs:
+
+```text
+External Tomcat Server
+```
 
 ---
 
 ## Spring Boot
 
+Provides:
+
 ```text
-Simplifies Project Setup
+Embedded Tomcat
+```
 
-Reduces Configuration
+inside the application.
 
-Faster Development
+---
+
+# Spring Flow
+
+```text
+Spring App
+      ↓
+Create WAR
+      ↓
+Install Tomcat
+      ↓
+Deploy
+      ↓
+Run
 ```
 
 ---
 
-## Spring Security
+# Spring Boot Flow
 
 ```text
-Authentication
+Spring Boot App
+         ↓
+Run Application
+         ↓
+Embedded Tomcat Starts
+         ↓
+Application Ready
+```
 
-Authorization
+No separate Tomcat management.
 
-Application Security
+---
+
+# Another Major Difference
+
+## Spring
+
+Requires many configurations.
+
+Developer configures manually.
+
+---
+
+## Spring Boot
+
+Provides:
+
+```text
+Auto Configuration
 ```
 
 ---
 
-## Spring Data
+# Internal Flow
 
 ```text
-Database Operations
-
-Repository Support
-
-Data Access Simplification
+Dependency Added
+        ↓
+Spring Boot Detects
+        ↓
+Auto Configuration
+        ↓
+Ready to Use
 ```
 
 ---
 
-## Spring Cloud
+# Why Companies Prefer Spring Boot
+
+| Spring | Spring Boot |
+|----------|----------|
+| More Manual Setup | Less Manual Setup |
+| External Server Required | Embedded Server |
+| More Configuration | Auto Configuration |
+| More Developer Effort | Less Developer Effort |
+| Microservices Possible | Microservices Friendly |
+
+---
+
+# Why Spring Boot Dominates Job Market
+
+Modern applications are mostly:
 
 ```text
 Microservices
+```
 
-Distributed Systems
+Spring Boot is:
 
-Cloud Applications
+```text
+More Compatible
+      ↓
+With
+      ↓
+Microservices
+```
+
+Therefore companies prefer:
+
+```text
+Java
++
+Spring Boot
++
+Microservices
 ```
 
 ---
 
-## Spring Batch
+# Final Understanding
+
+## Spring
+
+Created to bring multiple Java solutions under one framework.
 
 ```text
-Large Data Processing
-
-Scheduled Jobs
-
-Bulk Operations
+Database
++
+Web
++
+Security
++
+Transactions
++
+Many Other Features
 ```
 
 ---
 
-# Complete Picture
+## Spring Boot
+
+Created to simplify Spring and support modern microservice development.
 
 ```text
-Business Requirement
-         │
-         ▼
-Application Code
-         │
-         ▼
-Spring Framework
-         │
-         ├── Object Management
-         ├── Dependency Management
-         ├── Security
-         ├── Transactions
-         ├── Integration
-         └── Web Support
-         │
-         ▼
-Application Ready
+Spring
+      +
+Embedded Server
+      +
+Auto Configuration
+      +
+Microservice-Friendly Features
+      =
+Spring Boot
+```
+
+---
+
+# Complete Evolution Timeline
+
+```text
+Core Java
+      ↓
+Advanced Java
+      ↓
+Struts + Hibernate + EJB
+      ↓
+Spring Framework (2003)
+      ↓
+Monolithic Applications
+      ↓
+Microservices Architecture
+      ↓
+Need for Better Development Experience
+      ↓
+Spring Boot (2014)
+      ↓
+Modern Java Development
 ```
 
 ---
 
 # Key Observation
 
-Developers should focus on:
+Spring Boot is NOT separate from Spring.
+
+Think of it as:
 
 ```text
-Business Logic
+Spring Framework
+        +
+Modern Enhancements
+        =
+Spring Boot
 ```
 
-Spring focuses on:
+If you learn Spring Boot properly:
 
 ```text
-Object Management
-
-Dependency Management
-
-Security
-
-Transactions
-
-Integration
+70–80% knowledge
+        ↓
+comes from
+        ↓
+Spring Framework
 ```
 
-This separation is the main reason Spring became one of the most widely used Java frameworks.
+That is why most Spring Boot courses first teach Spring fundamentals and then move to Spring Boot.
