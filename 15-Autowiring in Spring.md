@@ -4,7 +4,7 @@
 
 # 1. Situation (Why Autowiring Exists)
 
-You are creating objects manually like this:
+You are creating objects manually:
 
 ```java
 Account acc = new Account();
@@ -18,10 +18,10 @@ This creates a dependency chain:
 Account → depends on → Address
 ```
 
-Now imagine a large system:
+Now imagine a real system:
 
-- 50 services
-- 100 dependencies
+- 50+ services
+- 100+ dependencies
 - deep object graphs
 
 Manual wiring becomes:
@@ -34,20 +34,24 @@ Manual wiring becomes:
 
 # 2. Problem (What Breaks Without Autowiring)
 
-Without Spring automation:
+Without Spring:
 
-- You must manually create every object
-- You must manually connect dependencies
-- You must remember object creation order
+- You manually create every object
+- You manually connect dependencies
+- You must control creation order
 
-### Real issue:
+### Core issue:
 
 ```text
-Account cannot function without Address
+Account cannot work without Address
 BUT Address is created separately
 ```
 
-So every object creation becomes a "manual assembly problem".
+So object creation becomes:
+
+```text
+manual assembly problem
+```
 
 ---
 
@@ -55,9 +59,9 @@ So every object creation becomes a "manual assembly problem".
 
 Spring says:
 
-> "I already know all objects in the container. Let me connect them automatically."
+> “I already have all objects in the container. I will connect them automatically.”
 
-This is called:
+This is:
 
 ```text
 Autowiring = Automatic Dependency Injection
@@ -70,10 +74,8 @@ Autowiring = Automatic Dependency Injection
 Autowiring works ONLY with:
 
 ✔ Object references  
-❌ NOT primitives  
-❌ NOT String values  
-
-Example:
+❌ primitives  
+❌ String values  
 
 ```java
 @Autowired
@@ -84,116 +86,38 @@ private String name;       // NOT autowired
 
 ---
 
-# 5. Autowiring Modes (Old XML Concept)
+# 5. Autowiring Modes (Legacy XML Concept)
 
-| Mode | What Spring Uses | Internal Logic |
-|------|------------------|----------------|
-| no | nothing | manual wiring |
-| byName | bean name | setter injection |
-| byType | class type | setter injection |
-| constructor | constructor params | constructor injection |
-
----
-
-## 5.1 byName
-
-### Idea
-
-Match property name with bean name.
-
-```text
-property name = bean id
-```
-
-### Flow
-
-```text
-property: address
-        ↓
-search bean named "address"
-        ↓
-inject it
-```
+| Mode | Meaning | Internal Injection |
+|------|--------|--------------------|
+| no | no autowiring | manual |
+| byName | match bean name | setter |
+| byType | match class type | setter |
+| constructor | match constructor args | constructor |
 
 ---
 
-## 5.2 byType
-
-### Idea
-
-Match by class type.
-
-```text
-Address addr → inject Address bean
-```
-
-### Flow
-
-```text
-Find bean of type Address
-        ↓
-Inject into field
-```
-
----
-
-## 5.3 constructor
-
-### Idea
-
-Spring calls constructor and supplies dependencies.
-
-```text
-Create object → pass dependencies inside constructor
-```
-
----
-
-# Spring Autowiring Modes – byName, byType, constructor (Code + Clear Understanding)
-
----
-
-# 1. byName Autowiring
+# 6. byName Autowiring
 
 ## Situation
-You want Spring to inject dependency based on **bean name matching field name**.
+Inject based on NAME matching.
 
 ---
 
 ## Rule
+
 ```text
 field name == bean id
 ```
 
 ---
 
-## Example
+## XML
 
-### Dependency Bean
-```java
-@Component("address")
-public class Address {
-    public void show() {
-        System.out.println("Address bean created");
-    }
-}
-```
+```xml
+<bean id="address" class="com.demo.Address"/>
 
----
-
-### Target Bean
-```java
-@Component
-public class Employee {
-
-    // field name MUST match bean name: "address"
-    @Autowired
-    private Address address;
-
-    public Address getAddress() {
-        return address;
-    }
-}
+<bean id="employee" class="com.demo.Employee" autowire="byName"/>
 ```
 
 ---
@@ -201,63 +125,46 @@ public class Employee {
 ## Internal Flow
 
 ```text
-Employee field name: address
-        ↓
-Spring searches bean with name "address"
-        ↓
-Finds Address bean
-        ↓
-Injects into Employee
+field: address
+      ↓
+search bean id "address"
+      ↓
+match found
+      ↓
+call setAddress()
+      ↓
+inject dependency
 ```
 
 ---
 
-## Key Idea
-- Name matching drives injection
-- Very strict on naming
+## Key Point
+
+✔ Uses setter injection  
+✔ Very strict naming
 
 ---
 
-# 2. byType Autowiring
+# 7. byType Autowiring
 
 ## Situation
-Spring injects dependency based on **class type only**
+Inject based ONLY on CLASS TYPE.
 
 ---
 
 ## Rule
+
 ```text
-Match by Class Type
+match by data type
 ```
 
 ---
 
-## Example
+## XML
 
-### Dependency Bean
-```java
-@Component
-public class Address {
-    public void show() {
-        System.out.println("Address bean created");
-    }
-}
-```
-
----
-
-### Target Bean
-```java
-@Component
-public class Employee {
-
-    @Autowired
-    private Address addr; // name can be anything
-
-    public Address getAddr() {
-        return addr;
-    }
-}
+```xml
+<bean id="address" class="com.demo.Address"/>
+<bean id="employee" class="com.demo.Employee" autowire="byType"/>
 ```
 
 ---
@@ -265,90 +172,65 @@ public class Employee {
 ## Internal Flow
 
 ```text
-Spring sees @Autowired Address type
+Employee needs Address
         ↓
-Search all beans of type Address
+Spring searches by TYPE = Address
         ↓
 Find 1 bean
         ↓
-Inject it
+Inject
 ```
 
 ---
 
-## Key Idea
-- Field name DOES NOT matter
-- Only type matters
-- Most common autowiring style
+## Key Point
+
+✔ Field name ignored  
+✔ Only type matters  
+✔ Uses setter injection
 
 ---
 
-## Problem Case (IMPORTANT)
-
-If multiple beans exist:
-
-```java
-@Component
-class HomeAddress {}
-
-@Component
-class OfficeAddress {}
-```
-
-Then:
+## Failure Case
 
 ```text
-byType → ERROR (confusion)
+2 beans of same type → ERROR
 ```
-
-Spring cannot decide.
 
 ---
 
-# 3. constructor Autowiring
+# 8. constructor Autowiring
 
 ## Situation
-You want dependencies injected at **object creation time**
+Dependencies must be provided during object creation.
 
 ---
 
 ## Rule
+
 ```text
-Dependencies are passed through constructor
+inject via constructor
 ```
 
 ---
 
-## Example
+## XML
 
-### Dependency Bean
-```java
-@Component
-public class Address {
-    public void show() {
-        System.out.println("Address created");
-    }
-}
+```xml
+<bean id="address" class="com.demo.Address"/>
+<bean id="department" class="com.demo.Department"/>
+
+<bean id="employee" class="com.demo.Employee" autowire="constructor"/>
 ```
 
 ---
 
-### Target Bean
+## Java
+
 ```java
-@Component
-public class Employee {
-
-    private Address address;
-
-    // constructor injection
-    @Autowired
-    public Employee(Address address) {
-        this.address = address;
-    }
-
-    public Address getAddress() {
-        return address;
-    }
+public Employee(Address address, Department department) {
+    this.address = address;
+    this.department = department;
 }
 ```
 
@@ -357,68 +239,38 @@ public class Employee {
 ## Internal Flow
 
 ```text
-Spring creates Address first
+Spring sees constructor
         ↓
-Spring sees Employee constructor
+Find parameters (Address, Department)
         ↓
-Needs Address parameter
+Resolve beans
         ↓
-Injects Address into constructor
+Call constructor
         ↓
-Employee object fully created
+Object created fully initialized
 ```
 
 ---
 
-## Key Idea
-- Dependency is REQUIRED at creation time
-- Object is NEVER created in incomplete state
-- Most clean and recommended approach
+## Key Point
+
+✔ Object is NEVER created partially  
+✔ Dependencies are mandatory  
+✔ Best design approach
 
 ---
 
-# 4. Quick Comparison
-
-| Mode | How It Matches | When Used |
-|------|----------------|----------|
-| byName | Field name == bean name | Rare |
-| byType | Class type | Most common |
-| constructor | Constructor params | Best practice |
-
----
-
-# 5. Final Mental Model
+## Failure Case
 
 ```text
-byName        → match variable name
-byType        → match class type
-constructor   → build object with dependencies directly
+Multiple beans of same type → ambiguity error
 ```
 
 ---
 
-# 6. Internal Spring Flow (All Modes)
+# 9. Modern @Autowired (Spring Boot Style)
 
-```text
-@ComponentScan
-        ↓
-Beans Created
-        ↓
-Spring sees @Autowired
-        ↓
-Decides strategy:
-   ├── byName (match name)
-   ├── byType (match class)
-   └── constructor (inject at creation)
-        ↓
-Dependency injected
-        ↓
-Bean ready
-```
-
-# 6. Modern Spring (@Autowired)
-
-Spring Boot removes manual wiring modes and uses:
+Spring Boot replaces XML modes with:
 
 ```java
 @Autowired
@@ -426,262 +278,114 @@ Spring Boot removes manual wiring modes and uses:
 
 ---
 
-# 7. Field Injection (@Autowired on Property)
-
-## Situation
-
-Account needs Address.
-
----
-
-## Code
-
-```java
-@Component
-public class Address {
-}
-```
+# 10. Field Injection
 
 ```java
 @Component
 public class Account {
 
     @Autowired
-    private Address addr;
+    private Address address;
 }
 ```
 
 ---
 
-## What Spring Does Internally
+## Internal Flow
 
 ```text
-Step 1: Scan @Component classes
+Create Account object
         ↓
-Step 2: Create Address bean
+Find @Autowired field
         ↓
-Step 3: Create Account bean
+Resolve byType
         ↓
-Step 4: Detect @Autowired field
+Inject Address
         ↓
-Step 5: Inject Address into Account
+Bean ready
 ```
 
 ---
 
-## Flow Diagram
-
-```text
-@ComponentScan
-      ↓
-Address Bean Created
-      ↓
-Account Bean Created
-      ↓
-@Autowired Found
-      ↓
-Dependency Injected
-      ↓
-Account Ready
-```
-
----
-
-## Result
-
-```text
-Address object automatically inside Account
-```
-
----
-
-## Key Observation
-
-Spring is doing:
-
-```text
-new Account() → then auto-filling Address inside it
-```
-
-You never call `new Address()` manually.
-
----
-
-# 8. Testing Injection
-
-```java
-Account account = context.getBean(Account.class);
-
-Address address = account.getAddr();
-address.setPincode(500072);
-
-System.out.println(address);
-```
-
----
-
-## Output Meaning
-
-```text
-Address [streetName=null, pincode=500072]
-```
-
-✔ Address was injected  
-✔ Not manually created  
-✔ Spring controlled lifecycle  
-
----
-
-# 9. Multiple Beans Problem (REAL AUTOWIRING FAILURE)
-
-## Situation
-
-Two beans of same type exist:
+# 11. Multiple Beans Problem (REAL ISSUE)
 
 ```java
 @Component("home")
-public class Addresss { }
+class Address {}
 
-@Bean("hyd")
-Addresss createAddress() { }
+@Bean("office")
+class Address {}
 ```
 
-Now Spring container has:
-
-```text
-home → Addresss
-hyd  → Addresss
-```
-
----
-
-## Injection Point
+Injection:
 
 ```java
 @Autowired
-private Addresss add;
+private Address address;
 ```
 
 ---
 
-# 10. Problem (Ambiguity)
-
-Spring tries:
+## Problem Flow
 
 ```text
-Find Addresss type bean
+byType → find Address
         ↓
-Found TWO:
-   - home
-   - hyd
+2 beans found
         ↓
-ERROR ❌
+CONFUSION
+        ↓
+Exception
 ```
 
 ---
 
-## Exception Meaning
+## Error
 
 ```text
-expected single bean but found 2
-```
-
-Spring says:
-
-> "I don't know which one to inject."
-
----
-
-## Internal Flow Failure
-
-```text
-@Autowired
-        ↓
-Search by Type: Addresss
-        ↓
-Match 2 Beans
-        ↓
-Confusion
-        ↓
-Throw Exception
+NoUniqueBeanDefinitionException
 ```
 
 ---
 
-# 11. Solution: @Qualifier
-
-## Idea
-
-Tell Spring EXACT bean name to inject.
-
----
-
-## Fix
+# 12. Solution: @Qualifier
 
 ```java
 @Autowired
-@Qualifier("hyd")
-private Addresss add;
+@Qualifier("home")
+private Address address;
 ```
 
 ---
 
-## Flow After Fix
+## Flow
 
 ```text
-@Autowired
+byType → multiple found
         ↓
-Find Addresss type
+Qualifier filters "home"
         ↓
-Filter by name = "hyd"
-        ↓
-Inject correct bean
+inject correct bean
 ```
 
 ---
 
-## Result
-
-```text
-Employee gets ONLY hyd bean
-```
-
----
-
-# 12. Final Understanding (Core Mental Model)
-
-## Spring Autowiring is NOT magic
-
-It is:
-
-```text
-1. Scan classes
-2. Create beans
-3. Store in container
-4. Match dependencies
-5. Inject automatically
-```
-
----
-
-# 13. Full Internal Flow
+# 13. Full Autowiring Internal Flow
 
 ```text
 @ComponentScan
         ↓
-Spring detects beans
+Spring finds beans
         ↓
 ApplicationContext stores them
         ↓
 @Bean + @Component processed
         ↓
-Object graph built
+Object graph created
         ↓
 @Autowired resolves dependencies
         ↓
 Injection completed
-        ↓
-Bean ready to use
 ```
 
 ---
@@ -689,29 +393,28 @@ Bean ready to use
 # 14. Key Observations
 
 - Autowiring = automatic dependency resolution
-- Works only with objects (not primitives/strings)
-- Field injection happens after object creation
-- ByType injection is default behavior
-- Multiple beans → ambiguity error
-- @Qualifier resolves ambiguity
-- Spring always builds full object graph before giving bean
+- Works only for objects
+- byType is default logic in annotations
+- byName uses field-name matching (XML)
+- constructor ensures fully initialized objects
+- multiple beans → ambiguity error
+- @Qualifier resolves conflicts
+- Spring always builds full object graph
 
 ---
 
-# Final Mental Picture
+# Final Mental Model
 
 ```text
-YOU: I want Account
-        ↓
-Spring: OK
-        ↓
-I will create Account
-        ↓
-I see it needs Address
-        ↓
-I find Address bean
-        ↓
-I inject it
-        ↓
-Here is your fully ready object
+1. Spring creates all beans
+2. Builds dependency graph
+3. Matches dependencies (byType/byName/constructor)
+4. Injects them
+5. Gives fully ready object
 ```
+
+---
+
+# One-line understanding
+
+👉 Autowiring = Spring automatically connecting beans by resolving dependencies using type, name, or constructor while building the application context.
