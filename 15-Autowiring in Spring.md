@@ -149,6 +149,273 @@ Create object → pass dependencies inside constructor
 
 ---
 
+# Spring Autowiring Modes – byName, byType, constructor (Code + Clear Understanding)
+
+---
+
+# 1. byName Autowiring
+
+## Situation
+You want Spring to inject dependency based on **bean name matching field name**.
+
+---
+
+## Rule
+```text
+field name == bean id
+```
+
+---
+
+## Example
+
+### Dependency Bean
+```java
+@Component("address")
+public class Address {
+    public void show() {
+        System.out.println("Address bean created");
+    }
+}
+```
+
+---
+
+### Target Bean
+```java
+@Component
+public class Employee {
+
+    // field name MUST match bean name: "address"
+    @Autowired
+    private Address address;
+
+    public Address getAddress() {
+        return address;
+    }
+}
+```
+
+---
+
+## Internal Flow
+
+```text
+Employee field name: address
+        ↓
+Spring searches bean with name "address"
+        ↓
+Finds Address bean
+        ↓
+Injects into Employee
+```
+
+---
+
+## Key Idea
+- Name matching drives injection
+- Very strict on naming
+
+---
+
+# 2. byType Autowiring
+
+## Situation
+Spring injects dependency based on **class type only**
+
+---
+
+## Rule
+```text
+Match by Class Type
+```
+
+---
+
+## Example
+
+### Dependency Bean
+```java
+@Component
+public class Address {
+    public void show() {
+        System.out.println("Address bean created");
+    }
+}
+```
+
+---
+
+### Target Bean
+```java
+@Component
+public class Employee {
+
+    @Autowired
+    private Address addr; // name can be anything
+
+    public Address getAddr() {
+        return addr;
+    }
+}
+```
+
+---
+
+## Internal Flow
+
+```text
+Spring sees @Autowired Address type
+        ↓
+Search all beans of type Address
+        ↓
+Find 1 bean
+        ↓
+Inject it
+```
+
+---
+
+## Key Idea
+- Field name DOES NOT matter
+- Only type matters
+- Most common autowiring style
+
+---
+
+## Problem Case (IMPORTANT)
+
+If multiple beans exist:
+
+```java
+@Component
+class HomeAddress {}
+
+@Component
+class OfficeAddress {}
+```
+
+Then:
+
+```text
+byType → ERROR (confusion)
+```
+
+Spring cannot decide.
+
+---
+
+# 3. constructor Autowiring
+
+## Situation
+You want dependencies injected at **object creation time**
+
+---
+
+## Rule
+```text
+Dependencies are passed through constructor
+```
+
+---
+
+## Example
+
+### Dependency Bean
+```java
+@Component
+public class Address {
+    public void show() {
+        System.out.println("Address created");
+    }
+}
+```
+
+---
+
+### Target Bean
+```java
+@Component
+public class Employee {
+
+    private Address address;
+
+    // constructor injection
+    @Autowired
+    public Employee(Address address) {
+        this.address = address;
+    }
+
+    public Address getAddress() {
+        return address;
+    }
+}
+```
+
+---
+
+## Internal Flow
+
+```text
+Spring creates Address first
+        ↓
+Spring sees Employee constructor
+        ↓
+Needs Address parameter
+        ↓
+Injects Address into constructor
+        ↓
+Employee object fully created
+```
+
+---
+
+## Key Idea
+- Dependency is REQUIRED at creation time
+- Object is NEVER created in incomplete state
+- Most clean and recommended approach
+
+---
+
+# 4. Quick Comparison
+
+| Mode | How It Matches | When Used |
+|------|----------------|----------|
+| byName | Field name == bean name | Rare |
+| byType | Class type | Most common |
+| constructor | Constructor params | Best practice |
+
+---
+
+# 5. Final Mental Model
+
+```text
+byName        → match variable name
+byType        → match class type
+constructor   → build object with dependencies directly
+```
+
+---
+
+# 6. Internal Spring Flow (All Modes)
+
+```text
+@ComponentScan
+        ↓
+Beans Created
+        ↓
+Spring sees @Autowired
+        ↓
+Decides strategy:
+   ├── byName (match name)
+   ├── byType (match class)
+   └── constructor (inject at creation)
+        ↓
+Dependency injected
+        ↓
+Bean ready
+```
+
 # 6. Modern Spring (@Autowired)
 
 Spring Boot removes manual wiring modes and uses:
