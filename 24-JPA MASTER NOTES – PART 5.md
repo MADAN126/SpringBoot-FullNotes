@@ -1,668 +1,860 @@
-# Part 4 → JPA_MASTER_NOTES.md (Application Flow, Spring Boot Startup & Complete Internal Architecture)
+# Part 5 → JPA_MASTER_NOTES.md (Advanced Concepts, Fetching, Cascading & Interview Points)
 
 ---
 
-# 22. Spring Boot Main Class
+# 32. FetchType in JPA
 
-Main Class:
-
-```java
-@SpringBootApplication
-public class EmpDetailsApplication {
-
-    public static void main(String[] args) {
-
-        ConfigurableApplicationContext container =
-                SpringApplication.run(
-                        EmpDetailsApplication.class,
-                        args);
-
-        Operations op1 =
-                container.getBean("operations",
-                        Operations.class);
-
-        op1.AddUserWithMultipleParking();
-    }
-}
-```
-
----
-
-# Why do we need Main Class?
-
-Every Spring Boot application starts from:
-
-```java
-public static void main()
-```
-
-This acts as the entry point.
-
-Without this:
+FetchType determines:
 
 ```text
-Spring Boot cannot start.
+WHEN related entities should be loaded.
 ```
 
----
-
-# SpringApplication.run()
-
-This is one of the most important methods.
-
-```java
-SpringApplication.run(
-        EmpDetailsApplication.class,
-        args);
-```
-
----
-
-# What happens internally?
+There are two types:
 
 ```text
-main()
-   ↓
-SpringApplication.run()
-   ↓
-Create Spring Container
-   ↓
-Read Configurations
-   ↓
-Auto Configuration Starts
-   ↓
-Component Scanning Starts
-   ↓
-Repository Scanning Starts
-   ↓
-Entity Scanning Starts
-   ↓
-Hibernate Initialization
-   ↓
-Datasource Creation
-   ↓
-Transaction Manager Creation
-   ↓
-All Beans Created
-   ↓
-IOC Container Ready
-   ↓
-Application Starts
+1. EAGER
+2. LAZY
 ```
 
 ---
 
-# Return Type
+# FetchType.EAGER
 
-```java
-ConfigurableApplicationContext
-```
-
-This represents:
+Meaning:
 
 ```text
-IOC Container
+Load parent and child immediately.
 ```
-
----
-
-# Why store it?
-
-Because we can do:
-
-```java
-container.getBean(...)
-```
-
-Example:
-
-```java
-Operations op =
-        container.getBean(Operations.class);
-```
-
----
-
-# Internal Representation
-
-```text
-ConfigurableApplicationContext
-        ↓
-ApplicationContext
-        ↓
-BeanFactory
-        ↓
-IOC Container
-```
-
----
-
-# 23. Getting Bean from Container
-
-Example:
-
-```java
-Operations op1 =
-container.getBean(
-        "operations",
-        Operations.class);
-```
-
----
-
-# What happens internally?
-
-```text
-Search bean named "operations"
-         ↓
-Found Operations bean
-         ↓
-Return singleton instance
-```
-
----
-
-# Equivalent
-
-Spring does:
-
-```java
-Operations op =
-new Operations();
-```
-
-But:
-
-```text
-Spring manages lifecycle.
-```
-
----
-
-# Internal Flow
-
-```text
-getBean()
-     ↓
-Search BeanDefinition
-     ↓
-Locate Bean Instance
-     ↓
-Return Object
-```
-
----
-
-# 24. Calling Business Method
-
-Example:
-
-```java
-op1.AddUserWithMultipleParking();
-```
-
----
-
-# Purpose
-
-Usually used to perform:
-
-```text
-Insert Operations
-
-Update Operations
-
-Delete Operations
-
-Testing Relationships
-```
-
----
-
-# Example Internal Flow
-
-```text
-AddUserWithMultipleParking()
-           ↓
-Create Employee
-           ↓
-Create Address
-           ↓
-Create Parking Objects
-           ↓
-Set Relationships
-           ↓
-repo.save(employee)
-           ↓
-Hibernate Executes SQL
-```
-
----
-
-# 25. Complete Save Flow
-
-Suppose:
-
-```java
-repo.save(employee);
-```
-
----
-
-# Internally
-
-```text
-save()
-    ↓
-JpaRepository Proxy
-    ↓
-SimpleJpaRepository
-    ↓
-EntityManager.persist()
-    ↓
-Hibernate Session
-    ↓
-SQL Generation
-    ↓
-Database INSERT
-```
-
----
-
-# Visual Diagram
-
-```text
-repo.save(emp)
-        ↓
-JpaRepository
-        ↓
-SimpleJpaRepository
-        ↓
-EntityManager
-        ↓
-Hibernate
-        ↓
-JDBC
-        ↓
-Oracle/MySQL
-```
-
----
-
-# 26. Hibernate's Role
-
-Hibernate is the JPA Provider.
-
-JPA only defines rules.
-
-Example:
-
-```text
-JPA says:
-"save entity"
-
-Hibernate says:
-"I know HOW to save."
-```
-
----
-
-# Responsibilities of Hibernate
-
-Hibernate performs:
-
-```text
-Object → SQL Conversion
-
-Relationship Handling
-
-Cascade Handling
-
-Dirty Checking
-
-Lazy Loading
-
-Caching
-
-Transaction Synchronization
-```
-
----
-
-# Example
-
-You write:
-
-```java
-repo.save(emp);
-```
-
-Hibernate generates:
-
-```sql
-INSERT INTO emp_details(...)
-
-INSERT INTO Addr(...)
-
-INSERT INTO Parking(...)
-```
-
----
-
-# 27. Entity Manager
-
-EntityManager is the heart of JPA.
-
-It performs:
-
-```text
-persist()
-
-merge()
-
-remove()
-
-find()
-
-flush()
-
-detach()
-```
-
----
-
-# Internal Hierarchy
-
-```text
-Application
-    ↓
-Repository
-    ↓
-EntityManager
-    ↓
-Hibernate Session
-    ↓
-Database
-```
-
----
-
-# persist()
-
-Purpose:
-
-```text
-Insert New Entity
-```
-
-Example:
-
-```java
-entityManager.persist(emp);
-```
-
-Equivalent SQL:
-
-```sql
-INSERT INTO emp_details...
-```
-
----
-
-# find()
-
-Purpose:
-
-```text
-Retrieve Entity
-```
-
-Example:
-
-```java
-entityManager.find(
-        EmployeeDetails.class,
-        101L);
-```
-
-Equivalent SQL:
-
-```sql
-SELECT *
-FROM emp_details
-WHERE emp_id=101;
-```
-
----
-
-# remove()
-
-Purpose:
-
-```text
-Delete Entity
-```
-
-Example:
-
-```java
-entityManager.remove(emp);
-```
-
-Equivalent SQL:
-
-```sql
-DELETE
-FROM emp_details
-WHERE emp_id=?;
-```
-
----
-
-# merge()
-
-Purpose:
-
-```text
-Update Detached Entity
-```
-
-Equivalent SQL:
-
-```sql
-UPDATE emp_details
-SET ...
-WHERE ...
-```
-
----
-
-# flush()
-
-Purpose:
-
-```text
-Synchronize Persistence Context
-with Database.
-```
-
----
-
-# Internal Flow
-
-```text
-Persistence Context
-       ↓
-flush()
-       ↓
-Pending SQL Generated
-       ↓
-Database Updated
-```
-
----
-
-# 28. Persistence Context
-
-Persistence Context is:
-
-```text
-First Level Cache of Hibernate.
-```
-
----
-
-# Stores
-
-```text
-Managed Entities
-```
-
-during transaction.
-
----
-
-# Example
-
-```java
-Employee e =
-entityManager.find(...);
-
-Employee e2 =
-entityManager.find(...);
-```
-
----
-
-# Internal Behavior
-
-```text
-First Query
-      ↓
-Database Hit
-      ↓
-Stored in Persistence Context
-
-Second Query
-      ↓
-Returned from Cache
-```
-
-No SQL executed second time.
-
----
-
-# Visual
-
-```text
-Database
-    ↓
-Persistence Context
-    ↓
-Application
-```
-
----
-
-# 29. Dirty Checking
-
-One of Hibernate's powerful features.
-
----
-
-# Meaning
-
-Hibernate automatically detects changes.
 
 ---
 
 Example
 
 ```java
-Employee emp =
-entityManager.find(...);
-
-emp.setCity("Delhi");
+@OneToMany(fetch = FetchType.EAGER)
+private List<Parking> parking;
 ```
-
-No save called.
 
 ---
 
-# Internally
+Suppose:
+
+Employee:
 
 ```text
-Entity Loaded
-      ↓
-Snapshot Created
-      ↓
-Entity Modified
-      ↓
-Transaction Commit
-      ↓
-Snapshot Compared
-      ↓
-UPDATE Generated
+101
+Madhan
+```
+
+Parking:
+
+```text
+P1
+P2
+P3
 ```
 
 ---
 
-# SQL
+When executing:
+
+```java
+repo.findById(101L);
+```
+
+Internally:
+
+```text
+Employee loaded
+        ↓
+Parking loaded immediately
+        ↓
+Return complete object graph
+```
+
+---
+
+Visual Flow
+
+```text
+Employee
+    ↓
+Parking
+    ↓
+Returned Together
+```
+
+---
+
+Generated SQL
 
 ```sql
-UPDATE emp_details
-SET city='Delhi'
+SELECT *
+FROM emp_details;
+
+SELECT *
+FROM parking
 WHERE emp_id=?;
 ```
 
 ---
 
-# 30. Transaction Commit Flow
-
-Complete Database Flow:
+# Advantages
 
 ```text
-Begin Transaction
-        ↓
-Entity Operations
-        ↓
-Persistence Context Updated
-        ↓
-Dirty Checking
-        ↓
-flush()
-        ↓
-SQL Generated
-        ↓
-Commit Transaction
-        ↓
-Database Updated
+Easy to use
+
+No LazyInitializationException
 ```
 
 ---
 
-# 31. Full JPA Internal Architecture
+# Disadvantages
 
 ```text
-Application
+Extra SQL
+
+Performance overhead
+```
+
+---
+
+# FetchType.LAZY
+
+Meaning:
+
+```text
+Load child only when needed.
+```
+
+---
+
+Example
+
+```java
+@OneToMany(fetch = FetchType.LAZY)
+private List<Parking> parking;
+```
+
+---
+
+Execution
+
+```java
+Employee emp=
+repo.findById(101L).get();
+```
+
+Only Employee loaded.
+
+---
+
+SQL
+
+```sql
+SELECT *
+FROM emp_details
+WHERE emp_id=?;
+```
+
+Parking NOT loaded.
+
+---
+
+Later:
+
+```java
+emp.getParking();
+```
+
+Now SQL executes:
+
+```sql
+SELECT *
+FROM parking
+WHERE emp_id=?;
+```
+
+---
+
+Visual Flow
+
+```text
+Employee Loaded
+      ↓
+Parking Deferred
+      ↓
+getParking()
+      ↓
+Parking Loaded
+```
+
+---
+
+# Comparison
+
+| Feature | EAGER | LAZY |
+|----------|--------|-------|
+| Child loaded immediately | Yes | No |
+| Performance | Lower | Better |
+| SQL generated | More | Less |
+| Default for OneToMany | No | Yes |
+| Default for ManyToOne | Yes | No |
+
+---
+
+# 33. Cascade Operations
+
+Cascade means:
+
+```text
+Apply parent operations to child entities.
+```
+
+---
+
+Example
+
+```java
+@OneToOne(cascade=CascadeType.ALL)
+private AddrDetails addr;
+```
+
+---
+
+Without Cascade
+
+```text
+Save Employee
+      ↓
+Address NOT saved
+```
+
+---
+
+With Cascade
+
+```text
+Save Employee
+      ↓
+Address automatically saved
+```
+
+---
+
+# Cascade Types
+
+```text
+ALL
+
+PERSIST
+
+MERGE
+
+REMOVE
+
+REFRESH
+
+DETACH
+```
+
+---
+
+# CascadeType.ALL
+
+Meaning:
+
+```text
+Apply all operations.
+```
+
+---
+
+Operations cascaded:
+
+```text
+save
+
+update
+
+delete
+
+merge
+
+refresh
+
+detach
+```
+
+---
+
+Example
+
+```java
+@OneToMany(
+cascade=CascadeType.ALL)
+private List<Parking> parking;
+```
+
+---
+
+# Save Flow
+
+```text
+save(Employee)
+      ↓
+save(Address)
+      ↓
+save(Parking)
+```
+
+---
+
+# Delete Flow
+
+```text
+delete(Employee)
+      ↓
+delete(Address)
+      ↓
+delete(Parking)
+```
+
+---
+
+# CascadeType.PERSIST
+
+Meaning:
+
+```text
+Only save cascades.
+```
+
+---
+
+Flow
+
+```text
+save(Employee)
+      ↓
+save(Child)
+```
+
+Delete does NOT cascade.
+
+---
+
+# CascadeType.MERGE
+
+Meaning:
+
+```text
+Update cascades.
+```
+
+---
+
+Flow
+
+```text
+update(Employee)
+       ↓
+update(Child)
+```
+
+---
+
+# CascadeType.REMOVE
+
+Meaning:
+
+```text
+Delete cascades.
+```
+
+---
+
+Flow
+
+```text
+delete(Employee)
+       ↓
+delete(Child)
+```
+
+---
+
+# 34. Bidirectional vs Unidirectional Relationships
+
+---
+
+# Unidirectional
+
+Only one side knows relationship.
+
+Example:
+
+Employee
+
+```java
+@OneToMany
+private List<Parking> parking;
+```
+
+Parking:
+
+```java
+No Employee reference.
+```
+
+---
+
+Flow
+
+```text
+Employee
      ↓
-Spring Boot
-     ↓
-IOC Container
-     ↓
-Repository
-     ↓
-JpaRepository Proxy
-     ↓
-EntityManager
-     ↓
-Hibernate Session
-     ↓
-Persistence Context
-     ↓
-JDBC
-     ↓
-Database
+Parking
+```
+
+Only.
+
+---
+
+# Bidirectional
+
+Both sides know relationship.
+
+Employee:
+
+```java
+@OneToMany
+private List<Parking> parking;
+```
+
+Parking:
+
+```java
+@ManyToOne
+private Employee employee;
+```
+
+---
+
+Flow
+
+```text
+Employee
+    ↔
+Parking
+```
+
+---
+
+Advantages
+
+```text
+Navigation possible both ways.
+```
+
+---
+
+Disadvantages
+
+```text
+Can create recursion issues.
+```
+
+Example:
+
+```text
+Employee
+  ↓
+Parking
+  ↓
+Employee
+  ↓
+Parking
+...
+```
+
+---
+
+# 35. Owning Side
+
+Very Important Interview Topic.
+
+---
+
+Meaning
+
+```text
+Side controlling foreign key.
+```
+
+---
+
+Example
+
+Parking:
+
+```java
+@ManyToOne
+@JoinColumn(name="emp_id")
+private Employee employee;
+```
+
+---
+
+Employee:
+
+```java
+@OneToMany
+private List<Parking> parking;
+```
+
+---
+
+Who owns relationship?
+
+```text
+Parking
+```
+
+because:
+
+```java
+@JoinColumn
+```
+
+exists there.
+
+---
+
+Visual
+
+```text
+Parking
+   ↓
+Foreign Key Updated
+```
+
+---
+
+# Rule
+
+```text
+@JoinColumn Side
+
+=
+
+Owning Side
+```
+
+---
+
+# 36. N+1 Problem
+
+Common Hibernate Problem.
+
+---
+
+Suppose:
+
+10 Employees.
+
+Each Employee:
+
+```text
+3 Parking records.
+```
+
+---
+
+Execution:
+
+```java
+repo.findAll();
+```
+
+---
+
+SQL
+
+```sql
+SELECT *
+FROM emp_details;
+```
+
+1 query.
+
+Then:
+
+```sql
+SELECT *
+FROM parking
+WHERE emp_id=1;
+
+SELECT *
+FROM parking
+WHERE emp_id=2;
+
+SELECT *
+FROM parking
+WHERE emp_id=3;
+
+...
+```
+
+10 more queries.
+
+---
+
+Total:
+
+```text
+11 Queries
+```
+
+---
+
+Formula
+
+```text
+1 + N
+```
+
+Hence:
+
+```text
+N+1 Problem
+```
+
+---
+
+Disadvantages
+
+```text
+Slow Performance
+
+Database Overload
+```
+
+---
+
+Solutions
+
+```text
+JOIN FETCH
+
+EntityGraph
+
+Batch Fetching
+```
+
+---
+
+# 37. Entity Lifecycle States
+
+JPA Entities have four states.
+
+---
+
+# New (Transient)
+
+```java
+Employee e=
+new Employee();
+```
+
+Not managed.
+
+Not in database.
+
+---
+
+Flow
+
+```text
+Java Object
+
+Only JVM
+```
+
+---
+
+# Managed (Persistent)
+
+Example
+
+```java
+entityManager.persist(e);
+```
+
+---
+
+Flow
+
+```text
+EntityManager manages object.
+```
+
+---
+
+Changes tracked.
+
+---
+
+# Detached
+
+Example
+
+```java
+entityManager.detach(e);
+```
+
+---
+
+Meaning
+
+```text
+Entity exists
+
+But no longer managed.
+```
+
+---
+
+Changes NOT tracked.
+
+---
+
+# Removed
+
+Example
+
+```java
+entityManager.remove(e);
+```
+
+---
+
+Meaning
+
+```text
+Scheduled for deletion.
+```
+
+---
+
+Visual Lifecycle
+
+```text
+Transient
+    ↓
+persist()
+    ↓
+Managed
+    ↓
+detach()
+    ↓
+Detached
+    ↓
+remove()
+    ↓
+Removed
+```
+
+---
+
+# 38. Common Interview Questions
+
+---
+
+Q1. Difference between JPA and Hibernate?
+
+Answer:
+
+```text
+JPA
+
+→ Specification
+
+Hibernate
+
+→ Implementation of JPA
+```
+
+---
+
+Q2. What is EntityManager?
+
+Answer:
+
+```text
+Core JPA Interface.
+
+Handles persistence operations.
+```
+
+---
+
+Q3. What is Cascade?
+
+Answer:
+
+```text
+Propagation of parent operations
+to child entities.
+```
+
+---
+
+Q4. What is FetchType?
+
+Answer:
+
+```text
+Determines when child entities load.
+```
+
+---
+
+Q5. Default Fetch Types?
+
+Answer:
+
+```text
+@OneToMany  → LAZY
+
+@ManyToOne → EAGER
+
+@OneToOne  → EAGER
+
+@ManyToMany → LAZY
+```
+
+---
+
+Q6. What is Persistence Context?
+
+Answer:
+
+```text
+First Level Cache
+containing managed entities.
+```
+
+---
+
+Q7. What is Dirty Checking?
+
+Answer:
+
+```text
+Hibernate automatically detects
+entity changes and updates DB.
 ```
 
 ---
@@ -670,61 +862,41 @@ Database
 # Final Mental Picture
 
 ```text
-You:
-repo.save(employee)
-
-Spring:
-I'll delegate to JPA.
-
-JPA:
-I'll delegate to Hibernate.
-
-Hibernate:
-I'll generate SQL.
-
-JDBC:
-I'll send SQL.
-
-Database:
-Data Saved.
+Entity Created
+      ↓
+Managed by EntityManager
+      ↓
+Relationships Connected
+      ↓
+Cascade Applied
+      ↓
+Fetch Strategy Used
+      ↓
+Hibernate Generates SQL
+      ↓
+Database Updated
 ```
 
 ---
 
-## End of Part 4
+## End of Part 5
 
 Covered Topics:
 
-✔ Spring Boot Main Class
+✔ FetchType (EAGER vs LAZY)
 
-✔ SpringApplication.run()
+✔ Cascade Operations
 
-✔ ConfigurableApplicationContext
+✔ CascadeType.ALL
 
-✔ getBean()
+✔ Bidirectional Relationships
 
-✔ Operations Flow
+✔ Owning Side
 
-✔ save() Internal Flow
+✔ N+1 Problem
 
-✔ Hibernate Responsibilities
+✔ Entity Lifecycle States
 
-✔ EntityManager
+✔ Persistence Context Concepts
 
-✔ persist()
-
-✔ merge()
-
-✔ remove()
-
-✔ find()
-
-✔ flush()
-
-✔ Persistence Context
-
-✔ Dirty Checking
-
-✔ Transaction Commit Flow
-
-✔ Complete JPA Architecture
+✔ Advanced Interview Questions
